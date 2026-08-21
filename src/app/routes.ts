@@ -9,8 +9,10 @@ export const ROUTES = {
     capacity: '/capacity',
     simulator: '/simulator',
     sources: '/sources',
-    donate: '/donate',
   },
+  portal: '/portal',
+  portalNew: '/portal/new',
+  projects: '/projects',
   affordai: {
     overview: '/affordai',
     households: '/affordai/households',
@@ -23,6 +25,21 @@ export const ROUTES = {
     dataSources: '/affordai/data-sources',
     settings: '/affordai/settings',
   },
+  portalDetail: (id: string) => `/portal/${id}`,
+  portalVolunteer: (id: string) => `/portal/${id}/volunteer`,
+  portalLegalAid: (id: string) => `/portal/${id}/legal-aid`,
+  projectDetail: (id: string) => `/projects/${id}`,
+  projectVolunteer: (id: string) => `/projects/${id}/volunteer`,
+  projectLegalAid: (id: string) => `/projects/${id}/legal-aid`,
+} as const
+
+export const ROUTE_PATTERNS = {
+  portalDetail: '/portal/:id',
+  portalVolunteer: '/portal/:id/volunteer',
+  portalLegalAid: '/portal/:id/legal-aid',
+  projectDetail: '/projects/:id',
+  projectVolunteer: '/projects/:id/volunteer',
+  projectLegalAid: '/projects/:id/legal-aid',
 } as const
 
 export const householdPath = (householdId: number) =>
