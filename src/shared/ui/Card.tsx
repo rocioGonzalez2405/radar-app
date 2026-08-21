@@ -3,12 +3,18 @@ import type { ReactNode } from 'react'
 interface CardProps {
   children: ReactNode
   tight?: boolean
+  noPadding?: boolean
   className?: string
 }
 
-export const Card = ({ children, tight = false, className = '' }: CardProps) => (
+export const Card = ({
+  children,
+  tight = false,
+  noPadding = false,
+  className = '',
+}: CardProps) => (
   <div
-    className={`rounded-xl border border-line bg-ink-1 ${tight ? 'p-4' : 'p-5'} ${className}`}
+    className={`rounded-xl border border-line bg-ink-1 ${noPadding ? '' : tight ? 'p-4' : 'p-5'} ${className}`}
   >
     {children}
   </div>
