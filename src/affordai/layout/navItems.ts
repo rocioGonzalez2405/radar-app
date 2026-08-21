@@ -17,4 +17,6 @@ export const NAV_ITEMS: NavItem[] = [
   { to: ROUTES.affordai.marketPrices, label: 'Market Prices' },
   { to: ROUTES.affordai.predictions, label: 'Predictions' },
   { to: ROUTES.affordai.impact, label: 'Impact' },
+  { to: ROUTES.affordai.dataSources, label: 'Data Sources' },
+  { to: ROUTES.affordai.settings, label: 'Settings' },
 ]

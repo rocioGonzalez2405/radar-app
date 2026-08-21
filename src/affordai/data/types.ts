@@ -219,6 +219,38 @@ export interface IncomeBandBreakdown {
   rate: number
 }
 
+/**
+ * The two different notions of "high risk" this console carries, side by side.
+ *
+ * `inTier` is a capacity-based percentile cut over the descriptive affordability
+ * score — a fixed number of places in a program. `inBand` is the model's own
+ * probability clearing the top-paying band's threshold. They answer different
+ * questions and will not agree, which is the point of showing both.
+ */
+export interface RiskBandComparison {
+  /** The top band's inclusive lower bound on model probability. */
+  minRisk: number
+  /** What the top band pays. */
+  bandPercent: number
+  inBand: number
+  inTier: number
+  inBoth: number
+  population: number
+}
+
+/**
+ * One household-size cohort. Household size is an AUDIT-ONLY variable: the model
+ * never weights it, so this is how its influence gets checked rather than
+ * assumed.
+ */
+export interface SizeCohort {
+  size: number
+  households: number
+  inTopBand: number
+  /** The highest probability the model assigns anyone in this cohort. */
+  maxRisk: number
+}
+
 /** Subsidy spend for one area, covering its vulnerable households only. */
 export interface SubsidyAllocation {
   areaId: AreaId

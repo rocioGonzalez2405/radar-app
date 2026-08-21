@@ -10,6 +10,8 @@ import type {
   Household,
   IncomeBandBreakdown,
   OverviewKpis,
+  RiskBandComparison,
+  SizeCohort,
   SubsidyAllocation,
   Tier,
   TimeRange,
@@ -20,6 +22,8 @@ import { FORECAST } from '@/affordai/data/forecast'
 import { IMPACT } from '@/affordai/data/impact'
 import { PRODUCTS } from '@/affordai/data/products'
 import { RECOMMENDATIONS } from '@/affordai/data/recommendations'
+import { DEMO_POLICY } from '@/affordai/model/subsidyEngine'
+import type { SubsidyBand } from '@/affordai/model/subsidyEngine'
 import type {
   Forecast,
   ImpactMetrics,
@@ -245,6 +249,64 @@ export const vulnerabilityByIncomeBand = (): IncomeBandBreakdown[] =>
       rate: rows.length === 0 ? 0 : Number(((vulnerable / rows.length) * 100).toFixed(1)),
     }
   })
+
+/**
+ * The band that pays the most, found by percentage rather than by position.
+ *
+ * `DEMO_POLICY.bands` is documented as ordered high to low, but "the top band"
+ * has to survive somebody reordering that array, and every count below is
+ * measured against this band's threshold.
+ */
+export const topSubsidyBand = (): SubsidyBand =>
+  DEMO_POLICY.bands.reduce((highest, band) =>
+    band.percent > highest.percent ? band : highest,
+  )
+
+/**
+ * Measures both of the console's "high risk" populations rather than asserting
+ * either. The two definitions are independent and their counts move with the
+ * model, so nothing that reads this may cache a number from it.
+ */
+export const topBandVersusTier = (): RiskBandComparison => {
+  const band = topSubsidyBand()
+  const inBand = households.filter(
+    (household) => household.riskProbability >= band.minRisk,
+  )
+  return {
+    minRisk: band.minRisk,
+    bandPercent: band.percent,
+    inBand: inBand.length,
+    inTier: tierCounts()['high-risk'],
+    inBoth: inBand.filter((household) => household.tier === 'high-risk').length,
+    population: HOUSEHOLD_COUNT,
+  }
+}
+
+/**
+ * Household size against the model's top band, one cohort per size.
+ *
+ * The model does not weight size — it is an audit-only feature — so this is the
+ * check that says whether dropping its coefficient actually changed who reaches
+ * the paid band, measured rather than claimed.
+ */
+export const topBandBySize = (): SizeCohort[] => {
+  const band = topSubsidyBand()
+  const sizes = [...new Set(households.map((household) => household.size))].sort(
+    (a, b) => a - b,
+  )
+
+  return sizes.map((size) => {
+    const rows = households.filter((household) => household.size === size)
+    return {
+      size,
+      households: rows.length,
+      inTopBand: rows.filter(
+        (household) => household.riskProbability >= band.minRisk,
+      ).length,
+      maxRisk: Math.max(...rows.map((household) => household.riskProbability)),
+    }
+  })
+}
 
 /** Allocation covers the vulnerable population only — stable households are not subsidised. */
 export const subsidyAllocations = (): SubsidyAllocation[] =>

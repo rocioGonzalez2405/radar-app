@@ -16,6 +16,8 @@ import { PredictionsPage } from '@/affordai/pages/Predictions/PredictionsPage'
 import { ImpactPage } from '@/affordai/pages/Impact/ImpactPage'
 import { SubsidiesPage } from '@/affordai/pages/Subsidies/SubsidiesPage'
 import { MarketPricesPage } from '@/affordai/pages/MarketPrices/MarketPricesPage'
+import { DataSourcesPage } from '@/affordai/pages/DataSources/DataSourcesPage'
+import { SettingsPage } from '@/affordai/pages/Settings/SettingsPage'
 
 export const AppRoutes = () => (
   <Routes>
@@ -38,6 +40,8 @@ export const AppRoutes = () => (
         <Route path={ROUTES.affordai.impact} element={<ImpactPage />} />
         <Route path={ROUTES.affordai.subsidies} element={<SubsidiesPage />} />
         <Route path={ROUTES.affordai.marketPrices} element={<MarketPricesPage />} />
+        <Route path={ROUTES.affordai.dataSources} element={<DataSourcesPage />} />
+        <Route path={ROUTES.affordai.settings} element={<SettingsPage />} />
       </Route>
     </Route>
   </Routes>
