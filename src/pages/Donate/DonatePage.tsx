@@ -1,17 +1,8 @@
 import { useState } from 'react'
 import { Kpi } from '@/shared/ui/Kpi'
 import { Card, SectionHead, Footnote } from '@/shared/ui/Card'
-import {
-  donationCampaign,
-  suggestedDonationAmounts,
-  recentDonors,
-  subgroupGaps,
-  thirtyDayProjection,
-} from '@/shared/data/radarData'
-
-const familyBedGap =
-  subgroupGaps[0].demand - subgroupGaps[0].capacity
-const criticalCasesToday = thirtyDayProjection[0].criticalCases
+import { donationCampaign, suggestedDonationAmounts, recentDonors } from '@/pages/Donate/donateData'
+import { housingContext } from '@/shared/data/radarData'
 
 const formatCurrency = (value: number) =>
   `$${value.toLocaleString('en-US')}`
@@ -170,17 +161,16 @@ export const DonatePage = () => {
         <SectionHead title="Why this campaign" />
         <Card>
           <p className="text-[13px] leading-relaxed text-text-mid">
-            The Capacity page shows a projected{' '}
-            <b className="text-text-hi">family-bed gap of {familyBedGap}</b>{' '}
-            over the next 12 months — the fastest-growing shortfall of any
-            subgroup downtown. Meanwhile, Triage is tracking{' '}
-            <b className="text-text-hi">
-              {criticalCasesToday} critical-risk cases
-            </b>{' '}
-            today alone, most tied to eviction hearings and DV shelter exits
-            with only days of runway left. This fund exists to close that gap
-            directly — funding emergency beds and childcare before those
-            cases turn into a night on the street.
+            San Diego County's average rent is now{' '}
+            <b className="text-text-hi">${housingContext.averageRent.toLocaleString('en-US')}/month</b>
+            , up <b className="text-text-hi">{housingContext.rentIncrease5yr}%</b> over
+            the last 5 years, and{' '}
+            <b className="text-text-hi">{housingContext.eliSeverelyBurdenedPercent}%</b>{' '}
+            of extremely-low-income households are severely rent-burdened,
+            paying more than half their income on housing (
+            {housingContext.source}). This fund exists to close that gap
+            directly — funding emergency beds and support services before
+            families are pushed onto the street.
           </p>
         </Card>
       </div>
