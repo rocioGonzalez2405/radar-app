@@ -5,7 +5,8 @@ import { AFFORD_CHART_COLORS, VulnerabilityStackChart } from '@/affordai/charts/
 import { AiInsight } from '@/affordai/components/AiInsight'
 import { GeoPanel } from '@/affordai/components/GeoPanel'
 import { RangeToggle } from '@/affordai/components/RangeToggle'
-import { kpis, vulnerabilitySeries } from '@/affordai/data/selectors'
+import { RecommendationCard } from '@/affordai/components/RecommendationCard'
+import { kpis, recommendations, vulnerabilitySeries } from '@/affordai/data/selectors'
 import type { TimeRange } from '@/affordai/data/types'
 
 const percent = (value: number) => `${value > 0 ? '+' : ''}${value.toFixed(1)}%`
@@ -90,6 +91,16 @@ export const OverviewPage = () => {
       </Card>
 
       <GeoPanel />
+
+      <section className="flex flex-col gap-3">
+        <SectionHead
+          title="Recommended interventions"
+          note="AI recommendations · review before approving"
+        />
+        {recommendations().map((recommendation) => (
+          <RecommendationCard key={recommendation.id} recommendation={recommendation} />
+        ))}
+      </section>
     </div>
   )
 }
