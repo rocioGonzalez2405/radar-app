@@ -246,3 +246,34 @@ export const vulnerabilityByIncomeBand = (): IncomeBandBreakdown[] =>
       rate: rows.length === 0 ? 0 : Number(((vulnerable / rows.length) * 100).toFixed(1)),
     }
   })
+
+/**
+ * Declared here rather than in `types.ts` because that module is owned by the
+ * peer session implementing structural amendment 2. Consolidate it into
+ * `types.ts` once that boundary lifts.
+ */
+export interface SubsidyAllocation {
+  areaId: AreaId
+  areaLabel: string
+  households: number
+  averageSubsidy: number
+  monthlyCost: number
+}
+
+/** Allocation covers the vulnerable population only — stable households are not subsidised. */
+export const subsidyAllocations = (): SubsidyAllocation[] =>
+  AREAS.map((area) => {
+    const rows = households.filter(
+      (household) => household.area === area.id && household.tier !== 'stable',
+    )
+    const averageSubsidy = mean(rows.map((row) => row.currentSubsidy))
+    return {
+      areaId: area.id,
+      areaLabel: area.label,
+      households: rows.length,
+      averageSubsidy: Number(averageSubsidy.toFixed(1)),
+      // Scaled by the shared constant, never a literal: it has already been
+      // retuned twice, and `kpis` reads the same value so the two cannot drift.
+      monthlyCost: Math.round(rows.length * averageSubsidy * SUBSIDY_DOLLARS_PER_POINT),
+    }
+  })

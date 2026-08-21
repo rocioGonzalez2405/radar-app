@@ -148,3 +148,13 @@ describe('impactMetrics', () => {
     }
   })
 })
+
+describe('subsidyAllocations', () => {
+  it('covers every area and accounts for the vulnerable population', async () => {
+    const { subsidyAllocations } = await import('@/affordai/data/selectors')
+    const rows = subsidyAllocations()
+    expect(rows).toHaveLength(4)
+    expect(rows.reduce((total, row) => total + row.households, 0)).toBe(1846)
+    expect(rows.every((row) => row.monthlyCost > 0)).toBe(true)
+  })
+})
