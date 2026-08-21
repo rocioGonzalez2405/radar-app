@@ -108,15 +108,15 @@ import setupNonprofitRoutes from './routes/nonprofits'
 import setupInventoryRoutes from './routes/inventory'
 import setupNeedsRoutes from './routes/needs'
 import setupMatchRoutes from './routes/matches'
-// import setupTransactionRoutes from './routes/transactions'
-// import setupAdminRoutes from './routes/admin'
+import setupTransactionRoutes from './routes/transactions'
+import setupAdminRoutes from './routes/admin'
 
 setupNonprofitRoutes(app)
 setupInventoryRoutes(app)
 setupNeedsRoutes(app)
 setupMatchRoutes(app)
-// setupTransactionRoutes(app)
-// setupAdminRoutes(app)
+setupTransactionRoutes(app)
+setupAdminRoutes(app)
 
 // ============================================================================
 // ERROR HANDLING
