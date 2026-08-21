@@ -1975,6 +1975,266 @@ git commit -m "fix(affordai): recalibrate the score distribution so the hero ran
 
 ---
 
+### Task 6b: Ground the data layer in verified public sources
+
+**Files:**
+- Create: `src/affordai/data/sources.ts`
+- Create: `src/affordai/data/costBurden.ts`
+- Modify: `src/affordai/data/areas.ts`
+- Modify: `src/affordai/data/products.ts`
+- Modify: `src/affordai/data/recommendations.ts`
+- Modify: `src/affordai/data/forecast.ts`
+- Modify: `src/affordai/data/impact.ts`
+- Modify: `src/affordai/data/households.ts` (header comment only)
+- Modify: `src/affordai/data/types.ts`
+- Modify: `src/affordai/data/selectors.ts` (append `costBurdenBands`, `sources`)
+- Modify: `src/affordai/layout/AffordShell.tsx` (provenance line)
+- Test: `src/affordai/data/sources.test.ts`
+
+**Why this task exists.** `origin/main` replaced Radar's synthetic dataset with verified public San Diego sources: every figure in `src/shared/data/radarData.ts` carries a named, dated source, and where no public source exists the code says so outright. Radar's `AppShell` now renders a persistent **"Data verified through August 2026"** badge — and after the Structural amendment that badge sits above AffordAI too. AffordAI's fabricated 12,482-household caseload, 87% effectiveness, and $184K allocation currently sit under a verification claim they cannot back. That is the defect this task fixes.
+
+The pattern to follow is the one `radarData.ts` already established: **real macro signals with citations, case-level records explicitly simulated because individual records are protected.** Radar does exactly this for its triage rows, grounding them in the 211 San Diego risk-factor study while stating plainly that the cases are not real.
+
+**Provenance tiers.** Every figure in `src/affordai/data/` must be classified into exactly one of three tiers, and the tier must be visible in the UI wherever the figure appears.
+
+| Tier | Meaning |
+| --- | --- |
+| `verified` | Retrieved first-hand from the named public source. Carries source, `dataAsOf`, `lastVerified`. |
+| `reported` | Figure comes from a named public source that could not be retrieved first-hand from this environment (BLS and FRED both return HTTP 403 to automated requests). Cite the source AND state that it was not independently retrieved. |
+| `simulated` | No public source exists — typically because the underlying records are protected, or because the figure describes a hypothetical program. Must be labeled as simulated in the UI. |
+
+Never present a `reported` or `simulated` figure as `verified`. That inversion is the whole reason for this task.
+
+#### Verified figures — use these exactly
+
+Read first-hand from the PDF of **California Housing Partnership, "San Diego County 2026 Affordable Housing Needs Report", May 2026** (`dataAsOf: 'May 2026'`, underlying data 2024, `lastVerified: 'August 2026'`):
+
+- Average monthly asking rent, San Diego County: **$2,606**
+- Hourly wage needed to afford that rent: **$50.12**, which is **2.8×** the City of San Diego minimum wage
+- Low-income renter households without access to an affordable home: **129,829** (2024)
+- Interim housing beds available: **8,123** (2024)
+- State and federal housing funding: **$740 million**, a **9% decrease** year over year
+- Renter households in the county: approximately **214,000**
+- Cost burden by income band (2024) — percent cost burdened / percent **severely** cost burdened:
+
+| Income band | Cost burdened | Severely cost burdened |
+| --- | --- | --- |
+| Extremely Low-Income | 90% | 79% |
+| Very Low-Income | 87% | 46% |
+| Low-Income | 63% | 14% |
+| Moderate-Income | 29% | 2% |
+| Above Moderate-Income | 8% | 1% |
+
+Already cited in `src/shared/data/radarData.ts` and reusable as `verified` without re-checking, since that PR vetted them:
+
+- `rentIncrease5yr`: **22%**, 2020–2025 — California Housing Partnership, 2026 AHNR
+- Unemployment: county **3.9%**, state **4.7%**, national **4.1%**, May 2026 — California EDD, June 2026
+- U.S. Census Bureau ACS 5-year estimates, `dataAsOf: '2020–2024'` — available as a source for income context
+
+#### Reported figures — cite, and mark as not independently retrieved
+
+BLS and FRED return HTTP 403 to every automated request from this environment, so these came from search result summaries rather than the source document. Tier them `reported`, name the real series, and say in the Data Sources page that they were not retrieved first-hand.
+
+- San Diego area all-items CPI: **+3.2%** over the 12 months ending March 2026 — BLS, *Consumer Price Index, San Diego Area*
+- San Diego food at home: **+1.1%** over the two months ending March 2026 — same release
+- Milk, fresh whole, per gallon, U.S. city average: **$4.32**, June 2026 — BLS average price series `APU0000709112`
+- Eggs, Grade A large, per dozen, U.S. city average: **$2.14**, June 2026 — BLS average price series `APU0000708111`
+- Rice, white long-grain uncooked, per pound, West region: **$0.879**, April 2025 — BLS average price series `APU0400701312`
+
+Do not invent additional commodity prices at this tier. Products beyond milk, eggs, and rice keep the brief's illustrative prices and are tiered `simulated`.
+
+#### Simulated figures — keep, but label
+
+These describe a hypothetical program, so no public source can exist. They stay exactly as they are because the brief specifies them and the demo reads them aloud — but every surface that shows them must say so.
+
+- The 12,482-household population, and every per-household field
+- Household #10482 and its 2024/2025/2026 history
+- 1,846 currently vulnerable, 623 at high risk (a capacity-based percentile cut over a simulated population)
+- $184K allocated this month, 87% intervention effectiveness
+- The 90-day forecast: 2,213 projected, 84% confidence
+- Every figure in `impact.ts`, including the 412 prevented headline
+- The five risk-factor contributions (34/27/19/12/8) — these are a model attribution over simulated data
+
+- [ ] **Step 1: Write the failing test**
+
+Create `src/affordai/data/sources.test.ts`:
+
+```ts
+import { describe, expect, it } from 'vitest'
+import { AFFORD_SOURCES, PROVENANCE_SUMMARY } from '@/affordai/data/sources'
+import { COST_BURDEN_BANDS, COUNTY_HOUSING } from '@/affordai/data/costBurden'
+
+describe('source registry', () => {
+  it('mirrors the shape Radar uses for its Sources page', () => {
+    for (const source of AFFORD_SOURCES) {
+      expect(source.name.length).toBeGreaterThan(0)
+      expect(['public', 'protected']).toContain(source.status)
+      expect(source.dataAsOf.length).toBeGreaterThan(0)
+      expect(source.lastVerified.length).toBeGreaterThan(0)
+      expect(['verified', 'reported', 'simulated']).toContain(source.tier)
+    }
+  })
+
+  it('marks every reported source as not independently retrieved', () => {
+    for (const source of AFFORD_SOURCES.filter((s) => s.tier === 'reported')) {
+      expect(source.note).toBeTruthy()
+      expect(source.note?.toLowerCase()).toContain('not independently retrieved')
+    }
+  })
+
+  it('carries at least one source in each tier', () => {
+    for (const tier of ['verified', 'reported', 'simulated'] as const) {
+      expect(AFFORD_SOURCES.some((s) => s.tier === tier)).toBe(true)
+    }
+  })
+
+  it('summarises provenance for the shell', () => {
+    expect(PROVENANCE_SUMMARY).toContain('simulated')
+  })
+})
+
+describe('county housing figures', () => {
+  it('matches the California Housing Partnership report', () => {
+    expect(COUNTY_HOUSING.averageAskingRent).toBe(2606)
+    expect(COUNTY_HOUSING.hourlyWageNeeded).toBe(50.12)
+    expect(COUNTY_HOUSING.minimumWageMultiple).toBe(2.8)
+    expect(COUNTY_HOUSING.renterHouseholdsWithoutAffordableHome).toBe(129829)
+    expect(COUNTY_HOUSING.tier).toBe('verified')
+  })
+})
+
+describe('cost burden bands', () => {
+  it('carries all five income bands from the report', () => {
+    expect(COST_BURDEN_BANDS).toHaveLength(5)
+    expect(COST_BURDEN_BANDS[0]).toMatchObject({
+      band: 'Extremely Low-Income',
+      costBurdened: 90,
+      severelyCostBurdened: 79,
+    })
+    expect(COST_BURDEN_BANDS[4]).toMatchObject({
+      band: 'Above Moderate-Income',
+      costBurdened: 8,
+      severelyCostBurdened: 1,
+    })
+  })
+
+  it('keeps severe burden at or below total burden in every band', () => {
+    for (const band of COST_BURDEN_BANDS) {
+      expect(band.severelyCostBurdened).toBeLessThanOrEqual(band.costBurdened)
+    }
+  })
+
+  it('falls monotonically as income rises', () => {
+    const rates = COST_BURDEN_BANDS.map((band) => band.costBurdened)
+    expect([...rates].sort((a, b) => b - a)).toEqual(rates)
+  })
+})
+```
+
+- [ ] **Step 2: Run it to verify it fails**
+
+Run: `npm test -- --run src/affordai/data/sources.test.ts`
+Expected: FAIL — cannot resolve `@/affordai/data/sources`.
+
+- [ ] **Step 3: Add the provenance types**
+
+Append to `src/affordai/data/types.ts`:
+
+```ts
+/**
+ * How much confidence a figure carries. `verified` was retrieved first-hand
+ * from the named source; `reported` comes from a named source that could not be
+ * retrieved from this environment; `simulated` has no public source, usually
+ * because the records are protected or the program is hypothetical.
+ */
+export type ProvenanceTier = 'verified' | 'reported' | 'simulated'
+
+export interface AffordSource {
+  name: string
+  status: 'public' | 'protected'
+  dataAsOf: string
+  lastVerified: string
+  tier: ProvenanceTier
+  note?: string
+}
+
+export interface CostBurdenBand {
+  band: string
+  costBurdened: number
+  severelyCostBurdened: number
+}
+```
+
+- [ ] **Step 4: Write the source registry**
+
+Create `src/affordai/data/sources.ts`. Mirror the field names in `src/shared/data/radarData.ts`'s `SourceEntry` so the two products' provenance tables read the same, and add the `tier` field. Populate it from the three tables above: one entry per named source, plus explicit `protected` entries for the record types that have no public aggregate — individual household income records and program caseload rosters.
+
+Export a `PROVENANCE_SUMMARY` string for the shell, worded so it cannot be mistaken for a verification claim. Use exactly:
+
+```ts
+export const PROVENANCE_SUMMARY =
+  'Macro indicators from verified public sources · household population simulated'
+```
+
+- [ ] **Step 5: Write the county housing and cost-burden modules**
+
+Create `src/affordai/data/costBurden.ts` exporting `COUNTY_HOUSING` and `COST_BURDEN_BANDS` with the verified figures listed above. Every exported object carries its `tier` and the source name in a comment directly above it, in the style `radarData.ts` uses.
+
+- [ ] **Step 6: Reground areas.ts**
+
+The four areas keep their ids and labels — Downtown, Eastside, North County, South County map onto San Diego's real regional structure. Replace the invented `incomeMedian` and `burdenRange` values so they are anchored to the county figures rather than pulled from nowhere: derive each area's rent level from the verified county average asking rent of **$2,606**, and state in the module header that **subregional rent and income are not separately published in any source reachable here, so the area-to-area variation is modeled, not measured.**
+
+This is the honest position and it must be written down in the file, not just in this plan.
+
+Do NOT change the exported `Area` shape or any area `id` — `selectors.ts`, `GeoPanel`, and the Households filters all depend on them.
+
+Re-running `npm test -- --run` after this step will surface any generator assertion that depended on the old constants. Task 3b's acceptance criteria still apply in full: the 623rd-lowest score must stay above 57, the hero must still rank inside the high-risk cut, and the tier counts must stay at exactly 623 and 1,846. If changing the area constants breaks those, retune as Task 3b describes — the criteria are not negotiable.
+
+- [ ] **Step 7: Retier products.ts**
+
+Milk, eggs, and rice take the `reported` BLS prices above and are marked `reported`. Every other product keeps its illustrative price and is marked `simulated`. Add a `tier` field to the `Product` interface in `types.ts`.
+
+Market prices are the goods' real retail cost; the subsidised columns remain a function of the simulated program's subsidy percentages, so they are `simulated` regardless of the market price's tier. Say that in the module header.
+
+- [ ] **Step 8: Reground the narrative modules**
+
+In `recommendations.ts`, replace invented driver deltas with the cited ones where a citation exists, and mark the rest `simulated`. The Eastside recommendation's rent-burden driver should reference the verified cost-burden data rather than an invented percentage.
+
+In `forecast.ts` and `impact.ts`, keep every figure — the brief specifies them and the demo depends on them — but add a `tier: 'simulated'` marker and a header comment stating that these describe a hypothetical program and no public source exists for them.
+
+In `households.ts`, replace the module header comment so the first thing a reader sees is that the population is simulated and why: individual household income and rent records are protected, and no program caseload roster is public.
+
+- [ ] **Step 9: Append the selectors**
+
+Append `costBurdenBands(): CostBurdenBand[]` and `sources(): AffordSource[]` to `selectors.ts`. No page reads a data module directly.
+
+- [ ] **Step 10: Surface provenance in the shell**
+
+In `AffordShell.tsx`, render `PROVENANCE_SUMMARY` directly under the "Subsidy Intelligence" line in the sidebar header, in `font-mono text-[10px] text-text-low`. It must be visible on every AffordAI page without scrolling, because Radar's "Data verified through August 2026" badge is visible at the same time and the two must be readable together.
+
+- [ ] **Step 11: Full verification**
+
+```bash
+npm test -- --run
+npm run typecheck
+npm run build
+```
+
+All three must pass. Test count grows by the new `sources.test.ts` cases.
+
+- [ ] **Step 12: Commit**
+
+```bash
+git add src/affordai/data src/affordai/layout/AffordShell.tsx
+git commit -m "feat(affordai): tier every figure by provenance and ground macro data in public sources"
+```
+
+**Downstream note for Task 18.** `DataSourcesPage` no longer invents its own `SOURCES` array. It renders `sources()` from the selector, grouped by tier, with `dataAsOf` and `lastVerified` columns matching Radar's Sources page, and the `protected` entries explaining why no public aggregate exists. The model card stays. Replace that task's hard-coded `SOURCES` constant accordingly.
+
+**Downstream note for Task 13.** The income-band table gains a second source of truth: `vulnerabilityByIncomeBand()` over the simulated population, and `costBurdenBands()` from the verified report. Show both, labeled, side by side — the simulated program's caseload against the county's real cost-burden distribution. That contrast is the most defensible thing on the page, so do not merge the two into one table.
+
+---
+
 ## UI task conventions
 
 Tasks 7–19 have no unit tests: there is no DOM test environment and adding one is out of scope. Their test cycle is instead:
