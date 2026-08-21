@@ -53,6 +53,15 @@ describe('hero household #10482 — already vulnerable', () => {
     })
   })
 
+  /** Both figures the brief states for this household, at both ends. */
+  it('opens at the brief score of 78 and closes at its score of 57', () => {
+    expect(hero.history[0].affordabilityScore).toBe(78)
+    expect(hero.history[hero.history.length - 1].affordabilityScore).toBe(57)
+    expect(hero.history[hero.history.length - 1].affordabilityScore).toBe(
+      hero.affordabilityScore,
+    )
+  })
+
   it('shows two years of deterioration in its ledger', () => {
     const [oldest] = hero.history
     const now = hero.history[hero.history.length - 1]

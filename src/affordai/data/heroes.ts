@@ -58,20 +58,23 @@ const scoreFor = (burden: number, size: number, penalty: number) =>
   Math.min(100, Math.max(0, Math.round(118 - burden * 95 - (size - 1) * 1.8 - penalty)))
 
 /**
- * `scoreOffset` shifts the whole score curve by a constant.
+ * `scoreDrift` bends the score curve, reaching its full value at the present
+ * month and nothing at the oldest.
  *
- * Needed for exactly one record. The brief hands us household #10482's
- * affordability score of 57 alongside a $4,200 income and an $1,850 rent, and
- * `scoreFor` does not produce 57 from those two numbers — it produces 67. The
- * brief's figure is the one the demo says out loud and the one the tier cut is
- * calibrated against, so it wins, and the offset carries the rest of the curve
- * with it rather than letting the header and the chart disagree by ten points.
+ * Needed for exactly one record. The brief gives household #10482 two scores:
+ * 78 at the start of the window and 57 today. `scoreFor` reproduces the 78 from
+ * that month's rent and income exactly — but at today's $4,200 income and
+ * $1,850 rent it produces 67, not 57.
+ *
+ * A constant shift would fix the near end and break the far one. Ramping it
+ * lands both of the brief's figures and leaves a smooth curve between them,
+ * which is what the chart and the header both read.
  */
 const buildLedger = (
   spec: LedgerSpec,
   size: number,
   penalty: number,
-  scoreOffset = 0,
+  scoreDrift = 0,
 ): HouseholdMonth[] => {
   const months = historyMonths()
   const income = series(spec.income, months.length)
@@ -89,7 +92,10 @@ const buildLedger = (
       balance: monthIncome - rent[index] - monthEssentials,
       affordabilityScore: Math.max(
         0,
-        scoreFor(rent[index] / monthIncome, size, penalty) + scoreOffset,
+        Math.round(
+          scoreFor(rent[index] / monthIncome, size, penalty) +
+            (scoreDrift * index) / (months.length - 1),
+        ),
       ),
     }
   })

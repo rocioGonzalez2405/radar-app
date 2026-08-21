@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { households } from '@/affordai/data/households'
 import type { Household } from '@/affordai/data/types'
-import { HORIZON_DAYS } from '@/affordai/model/riskModel'
+import { featuresFor } from '@/affordai/model/features'
+import { HORIZON_DAYS, predictRisk } from '@/affordai/model/riskModel'
 import {
   DEMO_POLICY,
   bandFor,
@@ -164,6 +165,30 @@ describe('smoothing', () => {
 })
 
 describe('the generated caseload', () => {
+  /**
+   * Regression: the generator used to band on `riskProbability` after rounding
+   * it to two decimals for display. A household at 0.6951 rounded to 0.70,
+   * crossed into the top band, and collected fifteen extra points of subsidy on
+   * a display artifact. 139 households were affected. Band boundaries are
+   * policy and must be compared against what the model actually said.
+   */
+  it('bands on the raw probability, not the rounded one', () => {
+    for (const household of households) {
+      const raw = predictRisk(featuresFor(household)).probability
+      expect(household.recommendedSubsidy).toBe(recommendSubsidy(household, raw).percent)
+    }
+  })
+
+  it('never lets rounding alone change a household band', () => {
+    const misbanded = households.filter((household) => {
+      const raw = predictRisk(featuresFor(household)).probability
+      return bandFor(raw).percent !== bandFor(household.riskProbability).percent
+        ? recommendSubsidy(household, raw).percent !== household.recommendedSubsidy
+        : false
+    })
+    expect(misbanded).toHaveLength(0)
+  })
+
   it('recommends within policy for every household', () => {
     for (const household of households) {
       expect(household.recommendedSubsidy).toBeGreaterThanOrEqual(0)

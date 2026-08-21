@@ -171,13 +171,18 @@ const buildHistory = (
  * and their recommendation are computed.
  */
 const scoreWithModel = (household: Household): Household => {
-  const riskProbability = Number(
-    predictRisk(featuresFor(household)).probability.toFixed(2),
-  )
+  const probability = predictRisk(featuresFor(household)).probability
+
   return {
     ...household,
-    riskProbability,
-    recommendedSubsidy: recommendSubsidy(household, riskProbability).percent,
+    // Rounded for display. Two decimals is all a card ever shows, and a stored
+    // 0.7013 would render as 0.70 anyway.
+    riskProbability: Number(probability.toFixed(2)),
+    // Banded on the RAW probability, never the rounded one. Rounding first puts
+    // a household at 0.6951 into the 0.70 band and hands it fifteen extra
+    // points of subsidy on a display artifact. The band boundaries are policy;
+    // they must be compared against what the model actually said.
+    recommendedSubsidy: recommendSubsidy(household, probability).percent,
   }
 }
 
