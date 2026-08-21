@@ -4727,8 +4727,10 @@ export const subsidyAllocations = (): SubsidyAllocation[] =>
       areaLabel: area.label,
       households: rows.length,
       averageSubsidy: Number(averageSubsidy.toFixed(1)),
-      // 6.24 is the same scaling constant kpis() uses; the two must stay in sync.
-      monthlyCost: Math.round(rows.length * averageSubsidy * 6.24),
+      // Import SUBSIDY_DOLLARS_PER_POINT from selectors.ts — do NOT hardcode a
+      // number here. Task 6b extracted it precisely so these two call sites
+      // cannot drift apart; it is 6.1 today and has already changed twice.
+      monthlyCost: Math.round(rows.length * averageSubsidy * SUBSIDY_DOLLARS_PER_POINT),
     }
   })
 ```
@@ -4904,6 +4906,10 @@ git commit -m "feat(affordai): add the subsidies allocation page"
 - Produces: `MarketPricesPage`.
 
 The one message this page must land: **the platform never changes the market price.** It sets the subsidy so qualifying households pay less.
+
+**Blocker to fix first — units.** Task 6b replaced the brief's round prices with real BLS average-price figures, and those carry incompatible units: milk is **per gallon** ($4.32), eggs **per dozen** ($2.14), rice **per pound** ($0.879). The five simulated products have no defined quantity at all. Rendering `$0.879` in the same column as `$11.80` without units is meaningless and actively misleading.
+
+Before building the table, add a required `unit: string` field to the `Product` interface in `types.ts` and populate it for every product — the BLS units are documented in the `products.ts` header for the three reported rows; choose and state a plausible unit for the five simulated ones. Render the unit beside the product label, never inside the price cell. A price column whose rows measure different quantities needs the quantity visible on every row.
 
 - [ ] **Step 1: Write the page**
 
