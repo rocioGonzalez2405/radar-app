@@ -1,10 +1,11 @@
 # radar-web
 
-Two hackathon prototypes in one single-page app.
+Three hackathon prototypes in one single-page app.
 
 | Product | Route | What it is |
 | --- | --- | --- |
 | **Radar** | `/` | Downtown women's homelessness prevention console — trend forecast, capacity gaps by subgroup, case-level triage, regional investment outcomes. |
+| **Impact Portal** | `/portal`, `/projects` | Project browse, creation, volunteer signup, and legal-aid intake. `/portal` is the admin view inside Radar's shell; `/projects` is the same data in a public-facing frame. |
 | **AffordAI** | `/affordai` | AI-powered affordability and subsidy intelligence — household vulnerability, a risk model, and a separate subsidy rules engine. |
 
 AffordAI is reached from Radar's top bar and renders inside the same shell, so
@@ -59,7 +60,10 @@ src/
 │   └── AppRoutes.tsx            route table — AffordAI nests inside AppShell
 ├── layouts/AppShell/            Radar's top bar and page frame
 ├── pages/                       Radar: Triage, Forecast, Capacity, Simulator
-│                                (labelled "Investment"), Sources, Donate
+│                                (labelled "Investment"), Sources
+│   └── Portal/                  Impact Portal — project browse, create,
+│                                volunteer signup, legal-aid intake
+├── layouts/PublicPortalShell/   public-facing frame for /projects
 ├── affordai/
 │   ├── layout/                  section sidebar, AI model status, provenance line
 │   ├── pages/                   Overview, Households, HouseholdDetail,
