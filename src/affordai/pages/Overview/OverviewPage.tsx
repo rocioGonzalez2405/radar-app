@@ -1,9 +1,17 @@
+import { useState } from 'react'
 import { Kpi } from '@/shared/ui/Kpi'
-import { kpis } from '@/affordai/data/selectors'
+import { Card, Legend, SectionHead } from '@/shared/ui/Card'
+import { AFFORD_CHART_COLORS, VulnerabilityStackChart } from '@/affordai/charts/AffordCharts'
+import { AiInsight } from '@/affordai/components/AiInsight'
+import { RangeToggle } from '@/affordai/components/RangeToggle'
+import { kpis, vulnerabilitySeries } from '@/affordai/data/selectors'
+import type { TimeRange } from '@/affordai/data/types'
 
 const percent = (value: number) => `${value > 0 ? '+' : ''}${value.toFixed(1)}%`
 
 export const OverviewPage = () => {
+  const [range, setRange] = useState<TimeRange>('90d')
+  const series = vulnerabilitySeries(range)
   const summary = kpis()
 
   return (
@@ -53,6 +61,32 @@ export const OverviewPage = () => {
           tone="ok"
         />
       </div>
+
+      <Card>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <SectionHead
+            title="Household vulnerability over time"
+            note="AI-assessed tiers · synthetic data"
+          />
+          <RangeToggle value={range} onChange={setRange} />
+        </div>
+        <Legend
+          items={[
+            { label: 'Stable', color: AFFORD_CHART_COLORS.stable },
+            { label: 'Emerging vulnerability', color: AFFORD_CHART_COLORS.emerging },
+            { label: 'High risk', color: AFFORD_CHART_COLORS.highRisk },
+          ]}
+        />
+        <div className="h-[320px]">
+          <VulnerabilityStackChart data={series} />
+        </div>
+        <div className="mt-4">
+          <AiInsight>
+            Financial vulnerability has increased <b>11.8%</b> in the last 90 days,
+            primarily driven by rising housing costs and declining household income.
+          </AiInsight>
+        </div>
+      </Card>
     </div>
   )
 }
