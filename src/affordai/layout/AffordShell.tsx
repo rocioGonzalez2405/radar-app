@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router'
 import { ROUTES } from '@/app/routes'
 import { Disclaimer } from '@/affordai/components/Disclaimer'
@@ -12,95 +11,93 @@ const navLinkClass = (isActive: boolean) =>
       : 'text-text-mid hover:bg-ink-2/60 hover:text-text-hi'
   }`
 
-export const AffordShell = () => {
-  const [navOpen, setNavOpen] = useState(false)
+const pillClass = (isActive: boolean) =>
+  `flex-shrink-0 rounded-full border px-3 py-1.5 text-[13px] font-medium transition-colors ${
+    isActive
+      ? 'border-blue bg-ink-2 text-text-hi'
+      : 'border-line text-text-mid hover:text-text-hi'
+  }`
 
-  const nav = (
-    <nav className="flex flex-col gap-1">
-      {NAV_ITEMS.map((item) => (
-        <NavLink
-          key={item.to}
-          to={item.to}
-          end={item.to === ROUTES.affordai.overview}
-          className={({ isActive }) => navLinkClass(isActive)}
-          onClick={() => setNavOpen(false)}
-        >
-          {item.label}
-        </NavLink>
-      ))}
-    </nav>
-  )
-
-  return (
-    <AffordStoreProvider>
-      <div className="min-h-screen bg-ink-0 md:flex">
-        <aside className="hidden w-[248px] flex-shrink-0 flex-col justify-between border-r border-line bg-ink-1 px-4 py-5 md:flex md:min-h-screen">
+/**
+ * AffordAI is a section of the console, not a separate application: the Radar
+ * top bar stays above this layout and marks AffordAI as the active nav item.
+ * This shell therefore owns no page chrome — no background, no max-width, no
+ * padding — only the section's own navigation beside its content.
+ */
+export const AffordShell = () => (
+  <AffordStoreProvider>
+    <div className="md:flex md:gap-7">
+      <aside className="hidden w-[220px] flex-shrink-0 flex-col md:flex">
+        <div className="mb-4 flex items-center gap-2.5">
+          <div className="flex h-[26px] w-[26px] flex-shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-blue to-teal font-mono text-[12px] font-bold text-[#08131f]">
+            A
+          </div>
           <div>
-            <NavLink
-              to={ROUTES.affordai.overview}
-              className="mb-7 flex items-center gap-3"
-            >
-              <div className="flex h-[30px] w-[30px] flex-shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-blue to-teal font-mono text-[13px] font-bold text-[#08131f]">
-                A
-              </div>
-              <div>
-                <div className="text-sm font-semibold tracking-wide">AffordAI</div>
-                <div className="font-mono text-[11px] uppercase tracking-wider text-text-low">
-                  Subsidy Intelligence
-                </div>
-              </div>
-            </NavLink>
-            {nav}
-          </div>
-
-          <div className="mt-8 flex flex-col gap-3">
-            <div className="rounded-lg border border-line-soft bg-ink-2 p-3">
-              <div className="mb-2 text-[11px] font-semibold tracking-wide text-text-low uppercase">
-                AI Model Status
-              </div>
-              <dl className="flex flex-col gap-1 font-mono text-[11px] text-text-mid">
-                <div className="flex justify-between gap-2">
-                  <dt>Model</dt>
-                  <dd className="text-text-hi">Affordability v1.4</dd>
-                </div>
-                <div className="flex justify-between gap-2">
-                  <dt>Last updated</dt>
-                  <dd className="text-text-hi">2 hours ago</dd>
-                </div>
-                <div className="flex justify-between gap-2">
-                  <dt>Status</dt>
-                  <dd className="inline-flex items-center text-teal">
-                    <span className="mr-1.5 inline-block h-[7px] w-[7px] rounded-full bg-teal shadow-[0_0_0_3px_var(--color-teal-dim)]" />
-                    Operational
-                  </dd>
-                </div>
-              </dl>
+            <div className="text-[13px] font-semibold tracking-wide">AffordAI</div>
+            <div className="font-mono text-[10px] tracking-wider text-text-low uppercase">
+              Subsidy Intelligence
             </div>
-            <Disclaimer />
           </div>
-        </aside>
-
-        <div className="min-w-0 flex-1">
-          <header className="sticky top-0 z-50 flex items-center justify-between border-b border-line bg-ink-1 px-4 py-3 md:hidden">
-            <span className="text-sm font-semibold">AffordAI</span>
-            <button
-              type="button"
-              className="rounded-md border border-line px-2.5 py-1.5 text-sm text-text-hi"
-              onClick={() => setNavOpen((open) => !open)}
-            >
-              Menu
-            </button>
-          </header>
-
-          {navOpen && (
-            <div className="border-b border-line bg-ink-1 px-4 pb-4 md:hidden">{nav}</div>
-          )}
-
-          <main className="mx-auto max-w-[1360px] px-8 py-7 max-md:px-4">
-            <Outlet />
-          </main>
         </div>
+
+        <nav className="flex flex-col gap-1">
+          {NAV_ITEMS.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === ROUTES.affordai.overview}
+              className={({ isActive }) => navLinkClass(isActive)}
+            >
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="mt-7 flex flex-col gap-3">
+          <div className="rounded-lg border border-line-soft bg-ink-2 p-3">
+            <div className="mb-2 text-[11px] font-semibold tracking-wide text-text-low uppercase">
+              AI Model Status
+            </div>
+            <dl className="flex flex-col gap-1 font-mono text-[11px] text-text-mid">
+              <div className="flex justify-between gap-2">
+                <dt>Model</dt>
+                <dd className="text-text-hi">Affordability v1.4</dd>
+              </div>
+              <div className="flex justify-between gap-2">
+                <dt>Updated</dt>
+                <dd className="text-text-hi">2 hours ago</dd>
+              </div>
+              <div className="flex justify-between gap-2">
+                <dt>Status</dt>
+                <dd className="inline-flex items-center text-teal">
+                  <span className="mr-1.5 inline-block h-[7px] w-[7px] rounded-full bg-teal shadow-[0_0_0_3px_var(--color-teal-dim)]" />
+                  Operational
+                </dd>
+              </div>
+            </dl>
+          </div>
+          <Disclaimer />
+        </div>
+      </aside>
+
+      {/* Below md the sidebar becomes a scrollable pill row. Radar's top bar
+          already owns the only Menu toggle, so this needs no second one. */}
+      <nav className="mb-5 flex gap-2 overflow-x-auto pb-1 md:hidden">
+        {NAV_ITEMS.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.to === ROUTES.affordai.overview}
+            className={({ isActive }) => pillClass(isActive)}
+          >
+            {item.label}
+          </NavLink>
+        ))}
+      </nav>
+
+      <div className="min-w-0 flex-1">
+        <Outlet />
       </div>
-    </AffordStoreProvider>
-  )
-}
+    </div>
+  </AffordStoreProvider>
+)

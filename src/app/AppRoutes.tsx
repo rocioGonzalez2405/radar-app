@@ -19,9 +19,12 @@ export const AppRoutes = () => (
       <Route path={ROUTES.radar.simulator} element={<SimulatorPage />} />
       <Route path={ROUTES.radar.sources} element={<SourcesPage />} />
       <Route path={ROUTES.radar.donate} element={<DonatePage />} />
-    </Route>
-    <Route element={<AffordShell />}>
-      <Route path={ROUTES.affordai.overview} element={<OverviewPage />} />
+      {/* AffordAI is nested inside the Radar shell so the top bar stays visible
+          and marks AffordAI as the active section. AffordShell contributes only
+          the section's sidebar. */}
+      <Route element={<AffordShell />}>
+        <Route path={ROUTES.affordai.overview} element={<OverviewPage />} />
+      </Route>
     </Route>
   </Routes>
 )
