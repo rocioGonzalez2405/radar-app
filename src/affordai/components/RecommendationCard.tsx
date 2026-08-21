@@ -80,7 +80,7 @@ export const RecommendationCard = ({
           <button
             type="button"
             onClick={() => approveRecommendation(recommendation.id)}
-            className="rounded-full bg-teal px-4 py-1.5 text-sm font-semibold text-[#08201a] hover:bg-teal/90"
+            className="rounded-full bg-teal px-4 py-1.5 text-sm font-semibold text-on-accent hover:bg-teal/90"
           >
             Approve
           </button>
