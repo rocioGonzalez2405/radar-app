@@ -4,6 +4,7 @@ import type { Household } from '@/affordai/data/types'
 import { featuresFor } from '@/affordai/model/features'
 import { HORIZON_DAYS, predictRisk } from '@/affordai/model/riskModel'
 import {
+  CYCLE_DAYS,
   DEMO_POLICY,
   bandFor,
   monthlyGapFor,
@@ -132,8 +133,17 @@ describe('recommendation', () => {
     )
   })
 
-  it('reports the horizon the model was asked about', () => {
-    expect(recommendSubsidy(householdWith(), 0.8).durationDays).toBe(HORIZON_DAYS)
+  it('reports the award cycle, not the prediction horizon', () => {
+    expect(recommendSubsidy(householdWith(), 0.8).durationDays).toBe(CYCLE_DAYS)
+  })
+
+  /**
+   * These were one constant, which made the console claim a 30-day prediction
+   * window because a subsidy happens to run for a month. They describe
+   * different things and must be free to differ.
+   */
+  it('keeps the award cycle independent of the prediction horizon', () => {
+    expect(CYCLE_DAYS).not.toBe(HORIZON_DAYS)
   })
 })
 

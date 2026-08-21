@@ -26,8 +26,22 @@ import type { Household, RiskFactor } from '@/affordai/data/types'
  * a funding decision).
  */
 
-/** The window the probability describes. The proposal leaves 30/60/90 open. */
-export const HORIZON_DAYS = 30
+/**
+ * The window the probability describes.
+ *
+ * The proposal leaves 30/60/90 open and asks the team to pick one; the demo
+ * script and the population forecast both say 90, so 90 it is.
+ *
+ * HONEST LIMITATION — this is a DECLARED interpretation, not a fitted
+ * parameter. The model has no time term: it reads a household's present
+ * position and its six- and twelve-month slopes, and returns one number. Change
+ * this constant to 30 and every probability stays exactly the same. What
+ * justifies the label is the input window, not the arithmetic, and the Settings
+ * page should say so rather than implying the model was trained against a
+ * ninety-day outcome. Doing that properly needs labelled historical outcomes,
+ * which a synthetic population cannot supply.
+ */
+export const HORIZON_DAYS = 90
 
 export const COEFFICIENTS: Record<FeatureKey, number> = {
   rentBurden: 6.0,

@@ -1,5 +1,16 @@
-import { HORIZON_DAYS } from '@/affordai/model/riskModel'
 import type { Household } from '@/affordai/data/types'
+
+/**
+ * How long an award runs before it is re-evaluated, and the period
+ * `maxChangePerCycle` smooths across.
+ *
+ * Deliberately NOT the model's HORIZON_DAYS. Those are two different concepts
+ * that were briefly the same constant: the horizon is how far ahead the
+ * probability looks, the cycle is a program's operating rhythm. The proposal's
+ * own worked example keeps them apart — a 78% risk of vulnerability, answered
+ * with a subsidy of 40% "durante 30 días".
+ */
+export const CYCLE_DAYS = 30
 
 /**
  * Subsidy rules engine.
@@ -55,7 +66,7 @@ export const DEMO_POLICY: SubsidyPolicy = {
     { minRisk: 0, percent: 0, interpretation: 'Stable or low risk — no subsidy' },
   ],
   maxPercent: 45,
-  durationDays: HORIZON_DAYS,
+  durationDays: CYCLE_DAYS,
   maxChangePerCycle: 12,
 }
 
