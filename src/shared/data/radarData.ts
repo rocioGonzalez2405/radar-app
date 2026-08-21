@@ -123,3 +123,38 @@ export const protectedSources: SourceEntry[] = [
   { name: 'Individual eviction/exit dates for triage scoring', description: 'Requires a data-sharing agreement with the local Continuum of Care\u2019s HMIS.', status: 'protected' },
   { name: 'Hospital discharge without a housing plan', description: 'Protected under HIPAA — needs a direct partnership with local health systems.', status: 'protected' },
 ]
+
+export interface DonationCampaign {
+  name: string
+  raised: number
+  goal: number
+  donorCount: number
+  daysLeft: number
+}
+
+// Synthetic fundraising data for the Donate page prototype.
+export const donationCampaign: DonationCampaign = {
+  name: 'Keep Downtown Families Off the Street',
+  raised: 48250,
+  goal: 75000,
+  donorCount: 412,
+  daysLeft: 22,
+}
+
+export const suggestedDonationAmounts = [25, 50, 100, 250]
+
+export interface Donor {
+  name: string
+  amount: number
+  timeAgo: string
+}
+
+// Synthetic recent-donor feed, styled like a crowdfunding activity list.
+export const recentDonors: Donor[] = [
+  { name: 'M. Alvarez', amount: 100, timeAgo: '2 min ago' },
+  { name: 'J. K.', amount: 25, timeAgo: '14 min ago' },
+  { name: 'Anonymous', amount: 250, timeAgo: '38 min ago' },
+  { name: 'D. Nguyen', amount: 50, timeAgo: '1 hr ago' },
+  { name: 'S. Reyes', amount: 500, timeAgo: '3 hr ago' },
+  { name: 'Anonymous', amount: 25, timeAgo: '5 hr ago' },
+]

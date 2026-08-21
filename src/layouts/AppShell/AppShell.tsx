@@ -54,6 +54,12 @@ export const AppShell = () => {
               <span className="mr-1.5 inline-block h-[7px] w-[7px] rounded-full bg-teal shadow-[0_0_0_3px_var(--color-teal-dim)]" />
               live · updated 6 min ago
             </span>
+            <NavLink
+              to={ROUTES.donate}
+              className="hidden rounded-full bg-coral px-4 py-1.5 text-sm font-semibold text-[#1a0f0a] hover:bg-coral/90 md:inline-flex"
+            >
+              Donate
+            </NavLink>
             <button
               type="button"
               className="rounded-md border border-line px-2.5 py-1.5 text-sm text-text-hi md:hidden"
@@ -77,6 +83,13 @@ export const AppShell = () => {
                 {item.label}
               </NavLink>
             ))}
+            <NavLink
+              to={ROUTES.donate}
+              className="inline-flex w-fit rounded-full bg-coral px-4 py-1.5 text-sm font-semibold text-[#1a0f0a]"
+              onClick={() => setNavOpen(false)}
+            >
+              Donate
+            </NavLink>
           </nav>
         )}
       </header>

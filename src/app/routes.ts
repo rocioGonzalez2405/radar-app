@@ -4,4 +4,5 @@ export const ROUTES = {
   capacity: '/capacity',
   simulator: '/simulator',
   sources: '/sources',
+  donate: '/donate',
 } as const
