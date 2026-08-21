@@ -2,3 +2,7 @@ node_modules
 dist
 .env.local
 *.tsbuildinfo
+
+# Local agent tooling. Contains absolute paths from the developer's machine
+# and a build fingerprint — nothing the app needs.
+.atl/
