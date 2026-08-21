@@ -1,8 +1,12 @@
 import { AREAS, areaById } from '@/affordai/data/areas'
+import { COST_BURDEN_BANDS } from '@/affordai/data/costBurden'
 import { HOUSEHOLD_COUNT, households } from '@/affordai/data/households'
+import { AFFORD_SOURCES } from '@/affordai/data/sources'
 import type {
+  AffordSource,
   AreaDetail,
   AreaId,
+  CostBurdenBand,
   Household,
   OverviewKpis,
   Tier,
@@ -41,12 +45,26 @@ export const tierCounts = (): Record<Tier, number> => {
 const mean = (values: number[]) =>
   values.reduce((total, value) => total + value, 0) / values.length
 
+/**
+ * Dollars of monthly allocation per subsidy percentage point across the
+ * vulnerable caseload. A scaling constant, not a derived value: it is the single
+ * knob that puts the total on the brief's $184K figure. Exported so
+ * `subsidyAllocations` cannot drift from `kpis`.
+ *
+ * Retuned from 6.24 to 6.1 in Task 6b, because regrounding the area constants
+ * on the verified county rent shifted the subsidy curve.
+ */
+export const SUBSIDY_DOLLARS_PER_POINT = 6.1
+
 export const kpis = (): OverviewKpis => {
   const counts = tierCounts()
   const vulnerable = counts.emerging + counts['high-risk']
   const allocated = households
     .filter((household) => household.tier !== 'stable')
-    .reduce((total, household) => total + household.currentSubsidy * 6.24, 0)
+    .reduce(
+      (total, household) => total + household.currentSubsidy * SUBSIDY_DOLLARS_PER_POINT,
+      0,
+    )
 
   return {
     householdsMonitored: HOUSEHOLD_COUNT,
@@ -182,3 +200,13 @@ export const productsByCategory = (category: ProductCategory | 'all'): Product[]
 export const forecast90d = (): Forecast => FORECAST
 
 export const impactMetrics = (): ImpactMetrics => IMPACT
+
+/**
+ * The county's real cost-burden distribution. Kept separate from
+ * `vulnerabilityByIncomeBand` over the simulated population: the two answer
+ * different questions and must never be merged into one table.
+ */
+export const costBurdenBands = (): CostBurdenBand[] => COST_BURDEN_BANDS
+
+/** Provenance for every figure in the console, grouped by tier on the page. */
+export const sources = (): AffordSource[] => AFFORD_SOURCES

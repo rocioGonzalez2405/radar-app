@@ -85,7 +85,7 @@ export interface Recommendation {
   whyItMatters: string
   modelPrediction: string
   recommendedAction: string
-  drivers: { label: string; delta: string }[]
+  drivers: { label: string; delta: string; tier: ProvenanceTier }[]
   subsidyFrom: number
   subsidyTo: number
   factors: RiskFactor[]
@@ -98,6 +98,12 @@ export interface Product {
   marketPrice: number
   currentPrice: number
   recommendedPrice: number
+  /**
+   * Applies to `marketPrice` only. `currentPrice` and `recommendedPrice` are
+   * always simulated — they are a function of the hypothetical program's
+   * subsidy percentages. See the header of products.ts.
+   */
+  tier: ProvenanceTier
 }
 
 export type ProductCategory = 'Dairy' | 'Protein' | 'Grains' | 'Produce'
@@ -115,6 +121,7 @@ export interface Forecast {
   confidence: number
   series: ForecastPoint[]
   drivers: RiskFactor[]
+  tier: ProvenanceTier
 }
 
 export interface ImpactMetrics {
@@ -124,6 +131,7 @@ export interface ImpactMetrics {
   costPerSuccessfulIntervention: number
   preventedFromHighRisk: number
   beforeAfter: { label: string; before: number; after: number }[]
+  tier: ProvenanceTier
 }
 
 export interface HouseholdQuery {
@@ -148,4 +156,27 @@ export interface TierThresholds
 {
   highRiskBelow: number
   emergingBelow: number
+}
+
+/**
+ * How much confidence a figure carries. `verified` was retrieved first-hand
+ * from the named source; `reported` comes from a named source that could not be
+ * retrieved from this environment; `simulated` has no public source, usually
+ * because the records are protected or the program is hypothetical.
+ */
+export type ProvenanceTier = 'verified' | 'reported' | 'simulated'
+
+export interface AffordSource {
+  name: string
+  status: 'public' | 'protected'
+  dataAsOf: string
+  lastVerified: string
+  tier: ProvenanceTier
+  note?: string
+}
+
+export interface CostBurdenBand {
+  band: string
+  costBurdened: number
+  severelyCostBurdened: number
 }

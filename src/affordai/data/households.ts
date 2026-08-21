@@ -1,3 +1,26 @@
+/**
+ * SIMULATED POPULATION — read this before trusting any number that comes out of
+ * this file.
+ *
+ * The 12,482 households below are generated, not sampled. Every per-household
+ * field — income, rent, burden, score, risk probability, subsidy, and the three
+ * years of history — is synthetic, and so are the tier counts derived from them.
+ *
+ * Why there is no alternative: individual household income and rent records are
+ * protected and have no public aggregate at household level, and no subsidy
+ * program caseload roster for San Diego County is published. A real caseload
+ * cannot be reconstructed from public data, so it is modeled instead and said
+ * to be modeled. This is the same position Radar takes for its triage rows in
+ * src/shared/data/radarData.ts.
+ *
+ * What IS grounded: the county-level anchors these households are generated
+ * around — average asking rent, the cost-burden bands, unemployment — all of
+ * which are verified public figures in costBurden.ts. The area-level spread
+ * between those anchors and these households is modeled; areas.ts says so.
+ *
+ * Radar's top bar shows "Data verified through August 2026" above this section.
+ * That badge covers the anchors, never this population.
+ */
 import { AREAS } from '@/affordai/data/areas'
 import { heroHouseholds } from '@/affordai/data/heroes'
 import { createRng, floatBetween, intBetween, pick, roundTo } from '@/affordai/data/seed'

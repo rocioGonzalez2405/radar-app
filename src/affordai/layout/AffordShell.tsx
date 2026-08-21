@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from 'react-router'
 import { ROUTES } from '@/app/routes'
 import { Disclaimer } from '@/affordai/components/Disclaimer'
+import { PROVENANCE_SUMMARY } from '@/affordai/data/sources'
 import { NAV_ITEMS } from '@/affordai/layout/navItems'
 import { AffordStoreProvider } from '@/affordai/state/AffordStore'
 
@@ -37,6 +38,10 @@ export const AffordShell = () => (
             <div className="font-mono text-[10px] tracking-wider text-text-low uppercase">
               Subsidy Intelligence
             </div>
+            {/* Radar's "Data verified through August 2026" badge is visible in
+                the top bar at the same time as this line. The badge covers the
+                county-level anchors; this line says what it does not cover. */}
+            <div className="font-mono text-[10px] text-text-low">{PROVENANCE_SUMMARY}</div>
           </div>
         </div>
 
@@ -81,7 +86,12 @@ export const AffordShell = () => (
       </aside>
 
       {/* Below md the sidebar becomes a scrollable pill row. Radar's top bar
-          already owns the only Menu toggle, so this needs no second one. */}
+          already owns the only Menu toggle, so this needs no second one. The
+          provenance line repeats here because the sidebar that carries it is
+          hidden at this width while Radar's verification badge is not. */}
+      <div className="mb-3 font-mono text-[10px] text-text-low md:hidden">
+        {PROVENANCE_SUMMARY}
+      </div>
       <nav className="mb-5 flex gap-2 overflow-x-auto pb-1 md:hidden">
         {NAV_ITEMS.map((item) => (
           <NavLink

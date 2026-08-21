@@ -14,10 +14,27 @@ describe('recommendations', () => {
     expect(first.subsidyFrom).toBe(18)
     expect(first.subsidyTo).toBe(25)
     expect(first.drivers).toEqual([
-      { label: 'Food prices', delta: '+9.2%' },
-      { label: 'Median household income', delta: '-4.1%' },
-      { label: 'Rent burden', delta: '+6.8%' },
+      { label: 'Food at home, San Diego area', delta: '+1.1%', tier: 'reported' },
+      { label: 'Median household income', delta: '-4.1%', tier: 'simulated' },
+      {
+        label: 'Very Low-Income renters cost burdened',
+        delta: '87%',
+        tier: 'verified',
+      },
     ])
+  })
+
+  it('tiers every driver, never overstating a simulated one', () => {
+    for (const recommendation of recommendations()) {
+      for (const driver of recommendation.drivers) {
+        expect(['verified', 'reported', 'simulated']).toContain(driver.tier)
+      }
+    }
+    // Eviction filings have no public source at county level, so the driver
+    // that cites them must stay simulated.
+    const downtown = recommendations().find((r) => r.areaId === 'downtown')
+    const evictions = downtown?.drivers.find((d) => d.label === 'Eviction filings')
+    expect(evictions?.tier).toBe('simulated')
   })
 
   it('fills all four explainability slots on every recommendation', () => {
@@ -37,27 +54,34 @@ describe('recommendations', () => {
 })
 
 describe('products', () => {
-  it('prices the brief staples with recommended below current below market', () => {
+  it('prices the staples from the BLS average price series', () => {
     const all = productsByCategory('all')
     const byLabel = new Map(all.map((product) => [product.label, product]))
-    expect(byLabel.get('Milk')).toMatchObject({
-      marketPrice: 4.5,
-      currentPrice: 3.7,
-      recommendedPrice: 3.2,
-    })
-    expect(byLabel.get('Eggs')).toMatchObject({
-      marketPrice: 6.2,
-      currentPrice: 5.1,
-      recommendedPrice: 4.4,
-    })
-    expect(byLabel.get('Rice')).toMatchObject({
-      marketPrice: 8,
-      currentPrice: 6.6,
-      recommendedPrice: 5.8,
-    })
+    // BLS average price series, cited in sources.ts but not independently
+    // retrieved from this environment.
+    expect(byLabel.get('Milk')).toMatchObject({ marketPrice: 4.32, tier: 'reported' })
+    expect(byLabel.get('Eggs')).toMatchObject({ marketPrice: 2.14, tier: 'reported' })
+    expect(byLabel.get('Rice')).toMatchObject({ marketPrice: 0.879, tier: 'reported' })
     for (const product of all) {
       expect(product.recommendedPrice).toBeLessThan(product.currentPrice)
       expect(product.currentPrice).toBeLessThan(product.marketPrice)
+    }
+  })
+
+  it('keeps every price without a BLS series simulated', () => {
+    const unsourced = productsByCategory('all').filter(
+      (product) => !['milk', 'eggs', 'rice'].includes(product.id),
+    )
+    expect(unsourced.length).toBeGreaterThan(0)
+    expect(unsourced.every((product) => product.tier === 'simulated')).toBe(true)
+  })
+
+  it('derives both subsidised columns from the same program percentages', () => {
+    for (const product of productsByCategory('all')) {
+      expect(product.currentPrice).toBe(Number((product.marketPrice * 0.82).toFixed(2)))
+      expect(product.recommendedPrice).toBe(
+        Number((product.marketPrice * 0.73).toFixed(2)),
+      )
     }
   })
 
@@ -94,6 +118,10 @@ describe('forecast90d', () => {
     expect(joins).toHaveLength(1)
   })
 
+  it('is labelled simulated, because no public projection exists', () => {
+    expect(forecast90d().tier).toBe('simulated')
+  })
+
   it('lists the predicted drivers', () => {
     const labels = forecast90d().drivers.map((driver) => driver.label)
     expect(labels).toEqual([
@@ -108,6 +136,10 @@ describe('forecast90d', () => {
 describe('impactMetrics', () => {
   it('reports the hero prevention metric', () => {
     expect(impactMetrics().preventedFromHighRisk).toBe(412)
+  })
+
+  it('is labelled simulated, because the program was never run', () => {
+    expect(impactMetrics().tier).toBe('simulated')
   })
 
   it('improves on every before/after pair', () => {
