@@ -5,6 +5,7 @@ import { FactorBars } from '@/affordai/components/FactorBars'
 import { Disclaimer } from '@/affordai/components/Disclaimer'
 import { formatMonth } from '@/affordai/data/calendar'
 import { factorsFor } from '@/affordai/data/factors'
+import { HORIZON_DAYS } from '@/affordai/model/riskModel'
 import { useAffordStore } from '@/affordai/state/AffordStore'
 import type { Household, Tier } from '@/affordai/data/types'
 
@@ -32,7 +33,10 @@ export const RiskAssessmentCard = ({ household }: { household: Household }) => {
   const incomeChange = ((last.income - first.income) / first.income) * 100
   const rentChange = ((last.rent - first.rent) / first.rent) * 100
   const negativeMonths = household.history.filter((month) => month.balance < 0).length
-  const horizonDays = 90
+  // Read the model's own window. This was hardcoded to 90, which overstated a
+  // 30-day prediction by three times — the exact class of defect this file is
+  // otherwise careful about: a literal in copy drifting from its source.
+  const horizonDays = HORIZON_DAYS
   const probability = Math.round(household.riskProbability * 100)
 
   return (
