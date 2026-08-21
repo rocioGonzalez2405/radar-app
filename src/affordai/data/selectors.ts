@@ -8,7 +8,9 @@ import type {
   AreaId,
   CostBurdenBand,
   Household,
+  IncomeBandBreakdown,
   OverviewKpis,
+  SubsidyAllocation,
   Tier,
   TimeRange,
   VulnerabilityPoint,
@@ -222,18 +224,6 @@ export const costBurdenBands = (): CostBurdenBand[] => COST_BURDEN_BANDS
 /** Provenance for every figure in the console, grouped by tier on the page. */
 export const sources = (): AffordSource[] => AFFORD_SOURCES
 
-/**
- * Declared here rather than in `types.ts` because that module is owned by the
- * peer session implementing structural amendment 2. Consolidate it into
- * `types.ts` once that boundary lifts.
- */
-export interface IncomeBandBreakdown {
-  band: string
-  households: number
-  vulnerable: number
-  rate: number
-}
-
 const BAND_EDGES: { band: string; min: number; max: number }[] = [
   { band: 'Under $3,000', min: 0, max: 3000 },
   { band: '$3,000 – $5,000', min: 3000, max: 5000 },
@@ -255,19 +245,6 @@ export const vulnerabilityByIncomeBand = (): IncomeBandBreakdown[] =>
       rate: rows.length === 0 ? 0 : Number(((vulnerable / rows.length) * 100).toFixed(1)),
     }
   })
-
-/**
- * Declared here rather than in `types.ts` because that module is owned by the
- * peer session implementing structural amendment 2. Consolidate it into
- * `types.ts` once that boundary lifts.
- */
-export interface SubsidyAllocation {
-  areaId: AreaId
-  areaLabel: string
-  households: number
-  averageSubsidy: number
-  monthlyCost: number
-}
 
 /** Allocation covers the vulnerable population only — stable households are not subsidised. */
 export const subsidyAllocations = (): SubsidyAllocation[] =>

@@ -200,3 +200,20 @@ export interface CostBurdenBand {
   costBurdened: number
   severelyCostBurdened: number
 }
+
+/** Vulnerability rate per monthly-income band, over the simulated population. */
+export interface IncomeBandBreakdown {
+  band: string
+  households: number
+  vulnerable: number
+  rate: number
+}
+
+/** Subsidy spend for one area, covering its vulnerable households only. */
+export interface SubsidyAllocation {
+  areaId: AreaId
+  areaLabel: string
+  households: number
+  averageSubsidy: number
+  monthlyCost: number
+}
