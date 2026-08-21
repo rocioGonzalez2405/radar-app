@@ -394,7 +394,7 @@ export const roundTo = (value: number, step: number) =>
 - [ ] **Step 8: Run the test to verify it passes**
 
 Run: `npm test -- --run src/affordai/data/seed.test.ts`
-Expected: PASS — 8 tests.
+Expected: PASS — 7 tests.
 
 - [ ] **Step 9: Typecheck**
 
@@ -1736,6 +1736,217 @@ git commit -m "feat(affordai): add recommendation, product, forecast, and impact
 ```
 
 The data layer is complete after this task. Every remaining task is UI and reads only `selectors.ts`.
+
+---
+
+### Task 3b: Recalibrate the score distribution around the hero
+
+**Files:**
+- Modify: `src/affordai/data/households.ts`
+- Modify: `src/affordai/data/heroes.test.ts` (append a describe block)
+- Modify: `src/affordai/data/households.test.ts` (append a describe block)
+
+**Interfaces:** unchanged. No new exports, no signature changes. Every later task reads the same names.
+
+**Why this task exists.** Tasks 1–3 shipped with the generator's median score at 57 — exactly the hero household's score — so household #10482 ranked 6258th and the percentile cut landed at score 39. That leaves the console self-contradicting: Task 18's Settings page reports "high risk = affordability score below 39" while the household the demo walks through is High Risk at 57. The counts were right and the mechanism was right; the score distribution was miscalibrated. This task fixes the distribution so the hero ranks inside the cut on its own merits, which also lets the hero-exclusion workaround from Task 3 be reverted.
+
+Three secondary incoherences fall out of the same miscalibration and are fixed here too: no generated household reaches the hero's 82% risk probability, generated subsidies top out near 15% while the hero's is 18%, and the `subsidiesAllocated` scaling constant was tuned against the old distribution.
+
+**Acceptance criteria.** Tune the constants until all six hold. Constants are the only thing that may change — not the targets, not the mechanism, not the hero's authored figures.
+
+1. The 623rd-lowest score across the whole population is **strictly greater than 57**, so household #10482 ranks inside the high-risk cut naturally.
+2. The hero-exclusion workaround is **reverted** to the plan's original simple form: rank all rows including heroes, then `if (rank < TARGET_HIGH_RISK) … else if (rank < TARGET_VULNERABLE) … else …`, with `tierThresholds` indexed at `TARGET_HIGH_RISK` and `TARGET_VULNERABLE`. Counts must still be exactly 623 high-risk and 1,846 vulnerable.
+3. Every generated `high-risk` household has `riskProbability >= 0.5`, and the maximum `riskProbability` among high-risk households is **at least 0.82**, so the hero's authored 0.82 sits inside the band rather than above it.
+4. Every generated `high-risk` household has `currentSubsidy` between 15 and 30 inclusive, so the hero's authored 18% is unremarkable.
+5. `kpis().subsidiesAllocated` still rounds to exactly `184000`. The `5.4` multiplier in `selectors.ts` is the single knob for this — retune it, and update the same multiplier in `subsidyAllocations` (Task 16) when you reach it so the two stay consistent.
+6. `npm test -- --run` passes in full, including every assertion from Tasks 1–3.
+
+**Starting point.** These constants were measured against the real generator and satisfy criterion 1 — the 623rd score lands at 59 and the 1846th at 64, over an observed range of 45 to 98:
+
+```ts
+const scoreFor = (
+  burden: number,
+  size: number,
+  stability: EmploymentStability,
+  noise: number,
+) =>
+  clamp(
+    Math.round(118 - burden * 95 - (size - 1) * 1.8 - STABILITY_PENALTY[stability] + noise),
+    0,
+    100,
+  )
+```
+
+with the noise draw in the generation loop widened to match: `floatBetween(rng, -5, 5)`.
+
+Criteria 3 and 4 still need the two derived formulas retuned, because both were written against a 23–87 score range and now see 45–98. Derive them from the observed range rather than from 0–100:
+
+```ts
+    const riskProbability = Number(
+      clamp(0.03 + (78 - affordabilityScore) / 26, 0.03, 0.97).toFixed(2),
+    )
+    const currentSubsidy = Math.round(clamp((100 - affordabilityScore) * 0.62, 0, 30))
+```
+
+Treat these three blocks as a starting point, not a final answer: measure, then adjust. Iterating on the constants is the work of this task.
+
+- [ ] **Step 1: Write a throwaway probe**
+
+Before changing anything, measure. Create `src/affordai/data/probe.test.ts` as a temporary instrument — it is deleted in Step 6, never committed:
+
+```ts
+import { expect, it } from 'vitest'
+import { HERO_HOUSEHOLD_ID } from '@/affordai/data/heroes'
+import { households, tierThresholds } from '@/affordai/data/households'
+
+it('probe: reports the distribution', () => {
+  const ranked = [...households].sort(
+    (a, b) => a.affordabilityScore - b.affordabilityScore || a.id - b.id,
+  )
+  const highRisk = households.filter((h) => h.tier === 'high-risk')
+  const generatedHighRisk = highRisk.filter((h) => h.id !== HERO_HOUSEHOLD_ID)
+  const heroRank = ranked.findIndex((h) => h.id === HERO_HOUSEHOLD_ID)
+
+  console.log({
+    thresholds: tierThresholds,
+    score623: ranked[622].affordabilityScore,
+    score1846: ranked[1845].affordabilityScore,
+    scoreMin: ranked[0].affordabilityScore,
+    scoreMedian: ranked[6240].affordabilityScore,
+    scoreMax: ranked[ranked.length - 1].affordabilityScore,
+    heroRank,
+    highRiskCount: highRisk.length,
+    riskMin: Math.min(...generatedHighRisk.map((h) => h.riskProbability)),
+    riskMax: Math.max(...generatedHighRisk.map((h) => h.riskProbability)),
+    subsidyMin: Math.min(...generatedHighRisk.map((h) => h.currentSubsidy)),
+    subsidyMax: Math.max(...generatedHighRisk.map((h) => h.currentSubsidy)),
+  })
+  expect(true).toBe(true)
+})
+```
+
+Run: `npm test -- --run src/affordai/data/probe.test.ts`
+Record the numbers. This is your before-picture.
+
+- [ ] **Step 2: Write the failing assertions**
+
+Append to `src/affordai/data/heroes.test.ts`:
+
+```ts
+describe('hero coherence with the generated population', () => {
+  it('ranks the hero inside the high-risk cut on its own score', () => {
+    const ranked = [...households].sort(
+      (a, b) => a.affordabilityScore - b.affordabilityScore || a.id - b.id,
+    )
+    const heroRank = ranked.findIndex((h) => h.id === HERO_HOUSEHOLD_ID)
+    expect(heroRank).toBeGreaterThanOrEqual(0)
+    expect(heroRank).toBeLessThan(623)
+  })
+
+  it('keeps the hero risk probability inside the high-risk band', () => {
+    const generated = households.filter(
+      (h) => h.tier === 'high-risk' && h.id !== HERO_HOUSEHOLD_ID,
+    )
+    const maxRisk = Math.max(...generated.map((h) => h.riskProbability))
+    expect(maxRisk).toBeGreaterThanOrEqual(0.82)
+  })
+
+  it('keeps the hero subsidy unremarkable among high-risk households', () => {
+    const generated = households.filter(
+      (h) => h.tier === 'high-risk' && h.id !== HERO_HOUSEHOLD_ID,
+    )
+    const subsidies = generated.map((h) => h.currentSubsidy)
+    expect(Math.min(...subsidies)).toBeGreaterThanOrEqual(15)
+    expect(Math.max(...subsidies)).toBeLessThanOrEqual(30)
+    expect(Math.min(...subsidies)).toBeLessThanOrEqual(18)
+    expect(Math.max(...subsidies)).toBeGreaterThanOrEqual(18)
+  })
+})
+```
+
+`households` must be imported in that file already; add it to the import list if not.
+
+Append to `src/affordai/data/households.test.ts`:
+
+```ts
+describe('tier threshold coherence', () => {
+  it('puts the high-risk boundary above the hero score of 57', () => {
+    expect(tierThresholds.highRiskBelow).toBeGreaterThan(57)
+  })
+
+  it('separates the two boundaries', () => {
+    expect(tierThresholds.emergingBelow).toBeGreaterThan(tierThresholds.highRiskBelow)
+  })
+})
+```
+
+- [ ] **Step 3: Run them to verify they fail**
+
+Run: `npm test -- --run`
+Expected: the new assertions FAIL — hero rank is around 6258, `highRiskBelow` is 39. Everything from Tasks 1–3 still passes. If the new assertions pass already, stop and report: the starting state is not what this task describes.
+
+- [ ] **Step 4: Recalibrate**
+
+Apply the three code blocks from **Starting point** above to `src/affordai/data/households.ts`, then revert the hero-exclusion workaround to the simple form named in acceptance criterion 2:
+
+```ts
+  // Percentile cut over the whole population. Ties break by id so the assignment
+  // is deterministic. Heroes are ranked with everyone else: their authored scores
+  // place them correctly, so no exclusion is needed.
+  const ranked = [...rows].sort(
+    (a, b) => a.affordabilityScore - b.affordabilityScore || a.id - b.id,
+  )
+  ranked.forEach((household, rank) => {
+    if (rank < TARGET_HIGH_RISK) household.tier = 'high-risk'
+    else if (rank < TARGET_VULNERABLE) household.tier = 'emerging'
+    else household.tier = 'stable'
+  })
+
+  return {
+    households: rows,
+    tierThresholds: {
+      highRiskBelow: ranked[TARGET_HIGH_RISK].affordabilityScore,
+      emergingBelow: ranked[TARGET_VULNERABLE].affordabilityScore,
+    },
+  }
+```
+
+Remove the now-unused `heroIds`, `heroHighRisk`, `heroVulnerable`, `highRiskCut`, and `vulnerableCut` locals — `noUnusedLocals` will fail the typecheck otherwise. The hero-injection loop above the cut stays exactly as it is.
+
+- [ ] **Step 5: Iterate until every criterion holds**
+
+Re-run the probe after each adjustment:
+
+```bash
+npm test -- --run src/affordai/data/probe.test.ts
+npm test -- --run
+```
+
+If criterion 3 fails, widen the `riskProbability` divisor or shift its offset. If criterion 4 fails, adjust the `0.62` subsidy multiplier. If criterion 1 fails, raise the score base or lower the burden coefficient. Change one constant at a time and re-measure — these interact.
+
+Criterion 5 is checked by `selectors.test.ts`, which asserts `subsidiesAllocated` is `184000`. When it fails, retune only the `5.4` multiplier in `kpis()` in `src/affordai/data/selectors.ts`. If `selectors.ts` does not exist yet because Task 4 has not run, skip criterion 5 and note it — Task 4 will surface it.
+
+- [ ] **Step 6: Delete the probe**
+
+```bash
+rm src/affordai/data/probe.test.ts
+```
+
+Confirm it is gone and never staged.
+
+- [ ] **Step 7: Full verification**
+
+Run: `npm test -- --run` — every test passes.
+Run: `npm run typecheck` — exits 0.
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add src/affordai/data/households.ts src/affordai/data/households.test.ts src/affordai/data/heroes.test.ts
+git commit -m "fix(affordai): recalibrate the score distribution so the hero ranks inside the high-risk cut"
+```
+
+**Downstream note for Task 18.** Under a capacity-based percentile cut the boundary score is shared by the ranks on either side of the cut, so "score below N" is not literally how tiers are assigned. Task 18's Settings page must present the boundaries as observed cut points, not as strict thresholds — that task's wording already reads "affordability score below" and needs the adjustment described there.
 
 ---
 
@@ -4734,20 +4945,25 @@ export const SettingsPage = () => (
     <Card>
       <SectionHead title="Tier thresholds" note="Affordability score boundaries" />
       <MetricRow
-        label="High risk — affordability score below"
+        label="High risk — cut point at score"
         value={tierThresholds.highRiskBelow}
         tone="danger"
       />
       <MetricRow
-        label="Emerging vulnerability — score below"
+        label="Emerging vulnerability — cut point at score"
         value={tierThresholds.emergingBelow}
       />
-      <MetricRow label="Stable — score at or above" value={tierThresholds.emergingBelow} />
+      <MetricRow
+        label="Assignment method"
+        value="Capacity-based percentile rank"
+      />
       <Footnote>
-        Boundaries are derived from a capacity-based percentile cut over the monitored
-        population: the {TARGET_HIGH_RISK} lowest-scoring households are high risk, and{' '}
-        {TARGET_VULNERABLE.toLocaleString('en-US')} of{' '}
-        {HOUSEHOLD_COUNT.toLocaleString('en-US')} are vulnerable in total.
+        Tiers are assigned by <b>rank</b>, not by a fixed score threshold: the{' '}
+        {TARGET_HIGH_RISK} lowest-scoring of{' '}
+        {HOUSEHOLD_COUNT.toLocaleString('en-US')} monitored households are high risk, and{' '}
+        {TARGET_VULNERABLE.toLocaleString('en-US')} are vulnerable in total. The cut
+        points above are the observed scores at those ranks, so households scoring
+        exactly at a cut point may fall on either side of it.
       </Footnote>
     </Card>
 
