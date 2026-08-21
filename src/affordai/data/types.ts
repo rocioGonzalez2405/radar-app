@@ -153,7 +153,7 @@ export interface HouseholdQuery {
   area: AreaId | 'all'
   tier: Tier | 'all'
   incomeBand: 'all' | 'under-3000' | '3000-5000' | '5000-7000' | 'over-7000'
-  sortBy: 'id' | 'affordabilityScore' | 'rentBurden' | 'monthlyIncome'
+  sortBy: 'id' | 'riskProbability' | 'affordabilityScore' | 'rentBurden' | 'monthlyIncome'
   sortDir: 'asc' | 'desc'
   page: number
   pageSize: number

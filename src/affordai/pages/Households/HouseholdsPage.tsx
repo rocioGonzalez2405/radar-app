@@ -9,6 +9,9 @@ import type { HouseholdQuery } from '@/affordai/data/types'
 
 const SORT_COLUMNS: { key: HouseholdQuery['sortBy']; label: string }[] = [
   { key: 'id', label: 'Household' },
+  // Predicted risk is the default sort, so it has to be a visible column — a
+  // table sorted on a value the reader cannot see just looks unsorted.
+  { key: 'riskProbability', label: 'Predicted risk' },
   { key: 'monthlyIncome', label: 'Income' },
   { key: 'rentBurden', label: 'Rent burden' },
   { key: 'affordabilityScore', label: 'Affordability' },
@@ -140,6 +143,19 @@ export const HouseholdsPage = () => {
                     >
                       #{household.id}
                     </Link>
+                  </td>
+                  <td className="py-2.5 pr-4 font-mono text-[13px] font-semibold">
+                    <span
+                      className={
+                        household.riskProbability >= 0.7
+                          ? 'text-coral'
+                          : household.riskProbability >= 0.3
+                            ? 'text-amber'
+                            : 'text-text-mid'
+                      }
+                    >
+                      {Math.round(household.riskProbability * 100)}%
+                    </span>
                   </td>
                   <td className="py-2.5 pr-4 font-mono text-[13px]">
                     ${household.monthlyIncome.toLocaleString('en-US')}

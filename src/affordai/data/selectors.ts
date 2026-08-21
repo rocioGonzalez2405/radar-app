@@ -146,8 +146,17 @@ export const DEFAULT_QUERY: HouseholdQuery = {
   area: 'all',
   tier: 'all',
   incomeBand: 'all',
-  sortBy: 'affordabilityScore',
-  sortDir: 'asc',
+  // Opens on who the MODEL considers most at risk, descending.
+  //
+  // Sorting by affordabilityScore ascending — the obvious-looking default — was
+  // a real defect: `scoreFor` subtracts (size - 1) * 1.8, so household size is
+  // baked into the score and sorting by it sorts by size. Page one came back
+  // 25 of 25 households with five or more people, and the console's first
+  // impression became "this program serves large families", which is an
+  // artifact of a sort order and not a finding. A subsidy console has to open
+  // on who needs help, and that is the model's answer, not a descriptive index.
+  sortBy: 'riskProbability',
+  sortDir: 'desc',
   page: 1,
   pageSize: 25,
 }
