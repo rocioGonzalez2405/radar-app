@@ -10,6 +10,7 @@ import { DonatePage } from '@/pages/Donate/DonatePage'
 import { AffordShell } from '@/affordai/layout/AffordShell'
 import { OverviewPage } from '@/affordai/pages/Overview/OverviewPage'
 import { HouseholdsPage } from '@/affordai/pages/Households/HouseholdsPage'
+import { HouseholdDetailPage } from '@/affordai/pages/HouseholdDetail/HouseholdDetailPage'
 
 export const AppRoutes = () => (
   <Routes>
@@ -26,6 +27,7 @@ export const AppRoutes = () => (
       <Route element={<AffordShell />}>
         <Route path={ROUTES.affordai.overview} element={<OverviewPage />} />
         <Route path={ROUTES.affordai.households} element={<HouseholdsPage />} />
+        <Route path={ROUTES.affordai.householdDetail} element={<HouseholdDetailPage />} />
       </Route>
     </Route>
   </Routes>
