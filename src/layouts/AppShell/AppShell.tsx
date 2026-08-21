@@ -6,9 +6,11 @@ const NAV_ITEMS = [
   { to: ROUTES.triage, label: 'Triage' },
   { to: ROUTES.forecast, label: 'Forecast' },
   { to: ROUTES.capacity, label: 'Capacity' },
-  { to: ROUTES.simulator, label: 'Simulator' },
+  { to: ROUTES.simulator, label: 'Investment' },
   { to: ROUTES.sources, label: 'Sources' },
 ]
+
+const DATA_VERIFIED_THROUGH = 'August 2026'
 
 const navLinkClass = (isActive: boolean) =>
   `text-sm font-medium border-b-2 pb-1 ${
@@ -52,7 +54,11 @@ export const AppShell = () => {
           <div className="flex items-center gap-4">
             <span className="hidden font-mono text-[11px] text-text-low sm:inline-flex sm:items-center">
               <span className="mr-1.5 inline-block h-[7px] w-[7px] rounded-full bg-teal shadow-[0_0_0_3px_var(--color-teal-dim)]" />
-              live · updated 6 min ago
+              live
+            </span>
+            <span className="hidden font-mono text-[11px] text-text-low sm:inline-flex sm:items-center">
+              <span className="mr-1.5 inline-block h-[7px] w-[7px] rounded-full bg-amber shadow-[0_0_0_3px_var(--color-amber-dim)]" />
+              Data verified through {DATA_VERIFIED_THROUGH}
             </span>
             <NavLink
               to={ROUTES.donate}

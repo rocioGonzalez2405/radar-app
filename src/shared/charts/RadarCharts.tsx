@@ -4,8 +4,7 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Line,
-  LineChart,
+  Cell,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -23,54 +22,21 @@ const tooltipStyle = {
   fontSize: 12,
 }
 
-interface TrendPoint {
-  year: string
-  historical: number | null
-  projected: number | null
-}
-
-export const TrendForecastChart = ({ data }: { data: TrendPoint[] }) => (
-  <ResponsiveContainer width="100%" height="100%">
-    <AreaChart data={data} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
-      <CartesianGrid stroke={GRID_COLOR} vertical={false} />
-      <XAxis dataKey="year" tick={TICK_STYLE} axisLine={false} tickLine={false} />
-      <YAxis tick={TICK_STYLE} axisLine={false} tickLine={false} />
-      <Tooltip contentStyle={tooltipStyle} />
-      <Area
-        type="monotone"
-        dataKey="historical"
-        stroke="#5b8def"
-        fill="#5b8def"
-        fillOpacity={0.12}
-        strokeWidth={2}
-        connectNulls
-      />
-      <Area
-        type="monotone"
-        dataKey="projected"
-        stroke="#ff6b4a"
-        strokeDasharray="6 4"
-        fill="transparent"
-        strokeWidth={2}
-        connectNulls
-      />
-    </AreaChart>
-  </ResponsiveContainer>
-)
-
 export const IndicatorAreaChart = ({
   data,
   dataKey,
+  xKey = 'month',
   color,
 }: {
   data: Record<string, string | number>[]
   dataKey: string
+  xKey?: string
   color: string
 }) => (
   <ResponsiveContainer width="100%" height="100%">
     <AreaChart data={data} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
       <CartesianGrid stroke={GRID_COLOR} vertical={false} />
-      <XAxis dataKey="month" tick={TICK_STYLE} axisLine={false} tickLine={false} />
+      <XAxis dataKey={xKey} tick={TICK_STYLE} axisLine={false} tickLine={false} />
       <YAxis tick={TICK_STYLE} axisLine={false} tickLine={false} />
       <Tooltip contentStyle={tooltipStyle} />
       <Area
@@ -85,55 +51,50 @@ export const IndicatorAreaChart = ({
   </ResponsiveContainer>
 )
 
-export const HorizontalBarChart = <T extends object>({
+interface SubgroupChangeDatum {
+  subgroup: string
+  changePercent: number
+  source: string
+}
+
+const CHANGE_UP_COLOR = '#ff6b4a' // coral — rising, a warning sign
+const CHANGE_DOWN_COLOR = '#2dd4a7' // teal — falling
+
+export const SubgroupChangeBarChart = ({
   data,
-  categoryKey,
-  bars,
+  onSelect,
 }: {
-  data: T[]
-  categoryKey: string
-  bars: { dataKey: string; color: string }[]
+  data: SubgroupChangeDatum[]
+  onSelect?: (item: SubgroupChangeDatum) => void
 }) => (
   <ResponsiveContainer width="100%" height="100%">
-    <BarChart data={data} layout="vertical" margin={{ top: 8, right: 16, left: 8, bottom: 0 }}>
+    <BarChart data={data} layout="vertical" margin={{ top: 8, right: 24, left: 8, bottom: 0 }}>
       <CartesianGrid stroke={GRID_COLOR} horizontal={false} />
-      <XAxis type="number" tick={TICK_STYLE} axisLine={false} tickLine={false} />
+      <XAxis type="number" tick={TICK_STYLE} axisLine={false} tickLine={false} unit="%" />
       <YAxis
         type="category"
-        dataKey={categoryKey}
+        dataKey="subgroup"
         tick={TICK_STYLE}
         axisLine={false}
         tickLine={false}
         width={110}
       />
-      <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
-      {bars.map((bar) => (
-        <Bar key={bar.dataKey} dataKey={bar.dataKey} fill={bar.color} radius={4} barSize={14} />
-      ))}
-    </BarChart>
-  </ResponsiveContainer>
-)
-
-export const ThirtyDayLineChart = ({
-  data,
-}: {
-  data: { day: string; criticalCases: number; bedCapacity: number }[]
-}) => (
-  <ResponsiveContainer width="100%" height="100%">
-    <LineChart data={data} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
-      <CartesianGrid stroke={GRID_COLOR} vertical={false} />
-      <XAxis dataKey="day" tick={TICK_STYLE} axisLine={false} tickLine={false} />
-      <YAxis tick={TICK_STYLE} axisLine={false} tickLine={false} />
-      <Tooltip contentStyle={tooltipStyle} />
-      <Line type="monotone" dataKey="criticalCases" stroke="#ff6b4a" strokeWidth={2} dot={{ r: 3 }} />
-      <Line
-        type="monotone"
-        dataKey="bedCapacity"
-        stroke="#5b8def"
-        strokeDasharray="6 4"
-        strokeWidth={2}
-        dot={false}
+      <Tooltip
+        contentStyle={tooltipStyle}
+        cursor={{ fill: 'rgba(255,255,255,0.03)' }}
+        formatter={(value: number) => [`${value > 0 ? '+' : ''}${value}%`, 'Change vs 2024']}
       />
-    </LineChart>
+      <Bar
+        dataKey="changePercent"
+        radius={4}
+        barSize={16}
+        onClick={(entry) => onSelect?.(entry as unknown as SubgroupChangeDatum)}
+        cursor="pointer"
+      >
+        {data.map((entry) => (
+          <Cell key={entry.subgroup} fill={entry.changePercent < 0 ? CHANGE_DOWN_COLOR : CHANGE_UP_COLOR} />
+        ))}
+      </Bar>
+    </BarChart>
   </ResponsiveContainer>
 )

@@ -1,11 +1,7 @@
 import { Kpi } from '@/shared/ui/Kpi'
 import { Card, SectionHead, Legend, Footnote } from '@/shared/ui/Card'
-import { TrendForecastChart, IndicatorAreaChart } from '@/shared/charts/RadarCharts'
-import {
-  yearlyTrend,
-  dvOccupancyTrend,
-  evictionFilingsTrend,
-} from '@/shared/data/radarData'
+import { IndicatorAreaChart } from '@/shared/charts/RadarCharts'
+import { countyTrend, downtownTrend, housingContext } from '@/shared/data/radarData'
 
 export const ForecastPage = () => (
   <div>
@@ -17,61 +13,77 @@ export const ForecastPage = () => (
         Where this is headed, and what's already signaling it
       </h1>
       <p className="mt-1 max-w-xl text-[13px] text-text-mid">
-        Historical count, 12-month projection, and the upstream signals that
-        move before the headline number does.
+        Countywide and downtown counts over time, plus the structural housing
+        pressure behind them.
       </p>
     </div>
 
     <div className="mb-7 grid grid-cols-2 gap-3.5 lg:grid-cols-4">
-      <Kpi label="Women served, current" value="312" delta="↑ 6.4% vs last quarter" deltaTone="up" tone="neutral" />
-      <Kpi label="Forecast, 12 months" value="+18%" delta="≈368 projected by 2027" tone="danger" />
-      <Kpi label="DV shelter occupancy" value="96%" delta="3 months above 95% — leading signal" deltaTone="up" tone="warn" />
-      <Kpi label="Eviction filings, women w/ children" value="+18%" delta="year over year" deltaTone="up" tone="warn" />
+      <Kpi
+        label="Countywide PIT Count, 2026"
+        value="9,803"
+        delta="↓ 7% vs 2024"
+        deltaTone="down"
+        tone="ok"
+      />
+      <Kpi
+        label="Downtown unsheltered count"
+        value="756"
+        delta="↓ 64% vs 2023 peak · Jun 2025"
+        deltaTone="down"
+        tone="ok"
+      />
+      <Kpi
+        label="Average rent, San Diego County"
+        value={`$${housingContext.averageRent.toLocaleString('en-US')}/mo`}
+        delta={`↑ ${housingContext.rentIncrease5yr}% over 5 years`}
+        deltaTone="up"
+        tone="warn"
+      />
+      <Kpi
+        label="ELI households severely rent-burdened"
+        value={`${housingContext.eliSeverelyBurdenedPercent}%`}
+        delta="paying 50%+ of income on housing"
+        tone="warn"
+      />
     </div>
 
     <div className="mb-7">
       <SectionHead
-        title="Historical trend &amp; 12-month projection"
-        note="Source: HUD PIT Count / AHAR"
+        title="Countywide Point-in-Time Count"
+        note="Source: RTFH WeAllCount PIT Count"
       />
       <Card>
-        <Legend
-          items={[
-            { label: 'Historical', color: '#5b8def' },
-            { label: 'Projected', color: '#ff6b4a' },
-          ]}
-        />
-        <div className="h-[300px]">
-          <TrendForecastChart data={yearlyTrend} />
+        <Legend items={[{ label: 'Total counted, countywide', color: '#5b8def' }]} />
+        <div className="h-[260px]">
+          <IndicatorAreaChart data={countyTrend} dataKey="total" xKey="year" color="#5b8def" />
         </div>
       </Card>
     </div>
 
     <div>
       <SectionHead
-        title="Leading indicators"
-        note="Move 3–6 months before the headline count"
+        title="Downtown unsheltered count"
+        note="Source: Downtown San Diego Partnership, monthly count"
       />
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <Legend items={[{ label: 'DV shelter occupancy, % monthly', color: '#e8a53d' }]} />
-          <div className="h-[220px]">
-            <IndicatorAreaChart data={dvOccupancyTrend} dataKey="occupancy" color="#e8a53d" />
-          </div>
-        </Card>
-        <Card>
-          <Legend items={[{ label: 'Eviction filings, households w/ children, monthly', color: '#ff6b4a' }]} />
-          <div className="h-[220px]">
-            <IndicatorAreaChart data={evictionFilingsTrend} dataKey="filings" color="#ff6b4a" />
-          </div>
-        </Card>
-      </div>
+      <Card>
+        <Legend items={[{ label: 'Unsheltered count, downtown', color: '#2dd4a7' }]} />
+        <div className="h-[260px]">
+          <IndicatorAreaChart data={downtownTrend} dataKey="count" xKey="month" color="#2dd4a7" />
+        </div>
+      </Card>
       <Footnote>
-        <b>Reading it —</b> when DV shelter occupancy stays above 95% for
-        several months and eviction filings for families keep climbing, both
-        have historically preceded a rise in the women's homelessness count
-        3–6 months later. That gives organizations a window to act before
-        the headline number moves.
+        <b>What changed here —</b> the previous version of this page showed a
+        synthetic DV-shelter-occupancy trend and a synthetic eviction-filings
+        trend as "leading indicators." Neither has a public data source for
+        San Diego at this granularity, so both were removed rather than kept
+        as invented numbers. In their place, the KPIs above use verified
+        structural housing context: average rent (
+        {`$${housingContext.averageRent.toLocaleString('en-US')}/month`}
+        ), its {housingContext.rentIncrease5yr}% rise over 5 years, and the{' '}
+        {housingContext.eliSeverelyBurdenedPercent}% of extremely-low-income
+        households paying more than half their income on housing — the real
+        cost pressure behind the counts above ({housingContext.source}).
       </Footnote>
     </div>
   </div>

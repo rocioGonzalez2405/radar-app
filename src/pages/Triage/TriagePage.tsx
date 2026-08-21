@@ -1,33 +1,30 @@
-import { Kpi } from '@/shared/ui/Kpi'
-import { Card, SectionHead, Legend, Footnote } from '@/shared/ui/Card'
+import { Card, SectionHead, Footnote } from '@/shared/ui/Card'
 import { Badge } from '@/shared/ui/Badge'
-import {
-  HorizontalBarChart,
-  ThirtyDayLineChart,
-} from '@/shared/charts/RadarCharts'
-import {
-  triageCases,
-  riskFactorBreakdown,
-  thirtyDayProjection,
-  newCasesBySource,
-} from '@/shared/data/radarData'
+import { triageCases, triageMethodologyNote } from '@/shared/data/radarData'
 
-const SCOPE_PILLS = ['All women', 'With children', '18–24', 'DV survivors']
+const SCOPE_PILLS = ['All cases', 'With children', '18–24', 'Shelter exits']
+
+const levelCounts = {
+  crit: triageCases.filter((c) => c.level === 'crit').length,
+  high: triageCases.filter((c) => c.level === 'high').length,
+  mod: triageCases.filter((c) => c.level === 'mod').length,
+}
 
 export const TriagePage = () => (
   <div>
     <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
       <div>
         <div className="mb-1.5 font-mono text-[11px] tracking-wide text-coral uppercase">
-          Downtown continuum of care
+          Simulated — grounded in real study
         </div>
         <h1 className="text-[26px] font-semibold tracking-tight">
           Who needs help first, today
         </h1>
         <p className="mt-1 max-w-xl text-[13px] text-text-mid">
-          Case-level urgency scoring for the women and children served by
-          downtown shelter and prevention programs — ranked by how little
-          time is left, not by arrival order.
+          Case-level urgency scoring, ranked by how little time is left. The
+          case rows below are illustrative, not real records — individual
+          HMIS data is protected. The risk-factor model is grounded in a real
+          211 San Diego study (see the card below).
         </p>
       </div>
       <div className="flex flex-wrap gap-2 font-mono text-xs">
@@ -47,18 +44,10 @@ export const TriagePage = () => (
       </div>
     </div>
 
-    <div className="mb-7 grid grid-cols-2 gap-3.5 lg:grid-cols-5">
-      <Kpi label="Women served, current" value="312" delta="↑ 6.4% vs last quarter" deltaTone="up" tone="neutral" />
-      <Kpi label="Forecast, 12 months" value="+18%" delta="≈368 projected by 2027" tone="danger" />
-      <Kpi label="DV shelter occupancy" value="96%" delta="3 months above 95%" deltaTone="up" tone="warn" />
-      <Kpi label="Family-bed gap, 12-mo" value="−55" delta="fastest-growing shortfall" tone="danger" />
-      <Kpi label="Critical risk cases, today" value="12" delta="8 beds open today" deltaTone="down" tone="ok" />
-    </div>
-
     <div className="mb-7">
       <SectionHead
-        title="Case triage — ranked by urgency, not arrival order"
-        note="Survival model · re-scored every 6h"
+        title="Simulated case triage — ranked by urgency, not arrival order"
+        note="Illustrative rows · not real records"
       />
       <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
         <Card tight>
@@ -89,52 +78,48 @@ export const TriagePage = () => (
               ))}
             </tbody>
           </table>
-        </Card>
-
-        <Card>
-          <Legend items={[{ label: 'Share of critical cases', color: '#ff6b4a' }]} />
-          <div className="h-[200px]">
-            <HorizontalBarChart
-              data={riskFactorBreakdown}
-              categoryKey="factor"
-              bars={[{ dataKey: 'count', color: '#ff6b4a' }]}
-            />
-          </div>
           <Footnote>
-            <b>Recommendation —</b> allocating today's 8 open beds to the top
-            8 ranked cases cuts this week's street-homelessness risk by ~90%
-            versus first-come, first-served intake.
+            <b>Note —</b> {levelCounts.crit} critical, {levelCounts.high} high,
+            and {levelCounts.mod} moderate cases shown above are a simulated
+            illustration of how the model would rank cases — not a real,
+            current caseload.
           </Footnote>
         </Card>
-      </div>
-    </div>
 
-    <div>
-      <SectionHead
-        title="Forward projection — next 30 days"
-        note="Leading indicators: eviction filings · DV occupancy · utility shutoffs"
-      />
-      <div className="grid gap-4 lg:grid-cols-2">
         <Card>
-          <Legend
-            items={[
-              { label: 'Projected critical cases', color: '#ff6b4a' },
-              { label: 'Bed capacity', color: '#5b8def' },
-            ]}
-          />
-          <div className="h-[230px]">
-            <ThirtyDayLineChart data={thirtyDayProjection} />
+          <div className="mb-2.5 text-[13px] font-semibold text-text-hi">
+            Methodology — what this model is grounded in
           </div>
-        </Card>
-        <Card>
-          <Legend items={[{ label: 'New critical cases by source', color: '#e8a53d' }]} />
-          <div className="h-[230px]">
-            <HorizontalBarChart
-              data={newCasesBySource}
-              categoryKey="source"
-              bars={[{ dataKey: 'count', color: '#e8a53d' }]}
-            />
+          <p className="mb-3 text-[12.5px] leading-relaxed text-text-mid">
+            <b className="text-text-hi">{triageMethodologyNote.studySource}:</b>{' '}
+            {triageMethodologyNote.finding}
+          </p>
+          <div className="mb-2 text-[10.5px] font-medium tracking-wide text-text-low uppercase">
+            Risk factors
           </div>
+          <ul className="mb-3 flex flex-wrap gap-1.5">
+            {triageMethodologyNote.riskFactors.map((factor) => (
+              <li
+                key={factor}
+                className="rounded-md bg-coral-dim px-2.5 py-0.5 font-mono text-[11px] text-[#ffb199]"
+              >
+                {factor}
+              </li>
+            ))}
+          </ul>
+          <div className="mb-2 text-[10.5px] font-medium tracking-wide text-text-low uppercase">
+            Protective factors
+          </div>
+          <ul className="flex flex-wrap gap-1.5">
+            {triageMethodologyNote.protectiveFactors.map((factor) => (
+              <li
+                key={factor}
+                className="rounded-md bg-teal-dim px-2.5 py-0.5 font-mono text-[11px] text-[#8fe9cd]"
+              >
+                {factor}
+              </li>
+            ))}
+          </ul>
         </Card>
       </div>
     </div>
@@ -144,8 +129,8 @@ export const TriagePage = () => (
       <a href="/sources" className="text-text-mid underline">
         Sources
       </a>{' '}
-      page for which of these indicators are drawn from public official data
-      versus modeled synthetically for this prototype.
+      page for which indicators are drawn from public official data versus
+      simulated for this prototype.
     </p>
   </div>
 )
