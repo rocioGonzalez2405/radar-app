@@ -1,4 +1,5 @@
 import { AREAS } from '@/affordai/data/areas'
+import { heroHouseholds } from '@/affordai/data/heroes'
 import { createRng, floatBetween, intBetween, pick, roundTo } from '@/affordai/data/seed'
 import type {
   AreaId,
@@ -132,21 +133,40 @@ const generate = (): { households: Household[]; tierThresholds: TierThresholds }
     })
   }
 
+  // Hero records replace their generated counterparts by id, before the cut, so
+  // the ranking sees the authored scores and search finds the authored rows.
+  for (const hero of heroHouseholds) {
+    const index = hero.id - FIRST_HOUSEHOLD_ID
+    if (index < 0 || index >= rows.length) {
+      throw new Error(`Hero household ${hero.id} is outside the generated id range`)
+    }
+    rows[index] = hero
+  }
+
   // Percentile cut. Ties are broken by id so the assignment is deterministic.
-  const ranked = [...rows].sort(
-    (a, b) => a.affordabilityScore - b.affordabilityScore || a.id - b.id,
-  )
+  // Hero tiers are authored, so the heroes are excluded from the ranking and
+  // subtracted from the targets the generated rows have left to fill. The
+  // population totals therefore still land exactly on the brief's figures.
+  const heroIds = new Set(heroHouseholds.map((hero) => hero.id))
+  const heroHighRisk = heroHouseholds.filter((hero) => hero.tier === 'high-risk').length
+  const heroVulnerable = heroHouseholds.filter((hero) => hero.tier !== 'stable').length
+  const highRiskCut = TARGET_HIGH_RISK - heroHighRisk
+  const vulnerableCut = TARGET_VULNERABLE - heroVulnerable
+
+  const ranked = rows
+    .filter((household) => !heroIds.has(household.id))
+    .sort((a, b) => a.affordabilityScore - b.affordabilityScore || a.id - b.id)
   ranked.forEach((household, rank) => {
-    if (rank < TARGET_HIGH_RISK) household.tier = 'high-risk'
-    else if (rank < TARGET_VULNERABLE) household.tier = 'emerging'
+    if (rank < highRiskCut) household.tier = 'high-risk'
+    else if (rank < vulnerableCut) household.tier = 'emerging'
     else household.tier = 'stable'
   })
 
   return {
     households: rows,
     tierThresholds: {
-      highRiskBelow: ranked[TARGET_HIGH_RISK].affordabilityScore,
-      emergingBelow: ranked[TARGET_VULNERABLE].affordabilityScore,
+      highRiskBelow: ranked[highRiskCut].affordabilityScore,
+      emergingBelow: ranked[vulnerableCut].affordabilityScore,
     },
   }
 }
