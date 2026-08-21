@@ -20,14 +20,26 @@ describe('factors', () => {
     expect(sum(HERO_FACTORS)).toBe(100)
   })
 
-  it('uses the brief contributions for the hero household', () => {
-    expect(HERO_FACTORS).toEqual([
-      { label: 'Rent burden', contribution: 34 },
-      { label: 'Income decline', contribution: 27 },
-      { label: 'Food inflation', contribution: 19 },
-      { label: 'Household size', contribution: 12 },
-      { label: 'Employment instability', contribution: 8 },
-    ])
+  /**
+   * These used to be the brief's hand-written table. They are now the model's
+   * own attribution for household #10482, so the assertion checks the shape and
+   * the ordering rather than five literals — a coefficient change should move
+   * these numbers, and a test that forbids that is testing the wrong thing.
+   */
+  it('derives the hero contributions from the model', () => {
+    expect(HERO_FACTORS.length).toBeGreaterThan(0)
+    expect(HERO_FACTORS.length).toBeLessThanOrEqual(5)
+    expect(HERO_FACTORS.every((factor) => factor.contribution > 0)).toBe(true)
+
+    const shares = HERO_FACTORS.map((factor) => factor.contribution)
+    expect(shares).toEqual([...shares].sort((a, b) => b - a))
+
+    const labels = HERO_FACTORS.map((factor) => factor.label)
+    expect(new Set(labels).size).toBe(labels.length)
+  })
+
+  it('reports different drivers for the hero than for the caseload', () => {
+    expect(HERO_FACTORS).not.toEqual(POPULATION_FACTORS)
   })
 })
 
@@ -108,5 +120,21 @@ describe('householdById', () => {
 
   it('returns undefined outside the population', () => {
     expect(householdById(1)).toBeUndefined()
+  })
+})
+
+describe('vulnerabilityByIncomeBand', () => {
+  it('covers the whole population across four bands', async () => {
+    const { vulnerabilityByIncomeBand } = await import('@/affordai/data/selectors')
+    const bands = vulnerabilityByIncomeBand()
+    expect(bands).toHaveLength(4)
+    expect(bands.reduce((total, band) => total + band.households, 0)).toBe(12482)
+    expect(bands.reduce((total, band) => total + band.vulnerable, 0)).toBe(1846)
+  })
+
+  it('reports a higher vulnerability rate for lower income bands', async () => {
+    const { vulnerabilityByIncomeBand } = await import('@/affordai/data/selectors')
+    const bands = vulnerabilityByIncomeBand()
+    expect(bands[0].rate).toBeGreaterThan(bands[bands.length - 1].rate)
   })
 })

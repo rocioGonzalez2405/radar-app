@@ -52,9 +52,11 @@ const mean = (values: number[]) =>
  * `subsidyAllocations` cannot drift from `kpis`.
  *
  * Retuned from 6.24 to 6.1 in Task 6b, because regrounding the area constants
- * on the verified county rent shifted the subsidy curve.
+ * on the verified county rent shifted the subsidy curve. Retuned again to 6.18
+ * when the generator gained monthly ledgers: the extra draws moved the seeded
+ * sequence, so the same seed now yields a different population.
  */
-export const SUBSIDY_DOLLARS_PER_POINT = 6.1
+export const SUBSIDY_DOLLARS_PER_POINT = 6.18
 
 export const kpis = (): OverviewKpis => {
   const counts = tierCounts()
@@ -210,3 +212,37 @@ export const costBurdenBands = (): CostBurdenBand[] => COST_BURDEN_BANDS
 
 /** Provenance for every figure in the console, grouped by tier on the page. */
 export const sources = (): AffordSource[] => AFFORD_SOURCES
+
+/**
+ * Declared here rather than in `types.ts` because that module is owned by the
+ * peer session implementing structural amendment 2. Consolidate it into
+ * `types.ts` once that boundary lifts.
+ */
+export interface IncomeBandBreakdown {
+  band: string
+  households: number
+  vulnerable: number
+  rate: number
+}
+
+const BAND_EDGES: { band: string; min: number; max: number }[] = [
+  { band: 'Under $3,000', min: 0, max: 3000 },
+  { band: '$3,000 – $5,000', min: 3000, max: 5000 },
+  { band: '$5,000 – $7,000', min: 5000, max: 7000 },
+  { band: 'Over $7,000', min: 7000, max: Number.POSITIVE_INFINITY },
+]
+
+export const vulnerabilityByIncomeBand = (): IncomeBandBreakdown[] =>
+  BAND_EDGES.map((edge) => {
+    const rows = households.filter(
+      (household) =>
+        household.monthlyIncome >= edge.min && household.monthlyIncome < edge.max,
+    )
+    const vulnerable = rows.filter((household) => household.tier !== 'stable').length
+    return {
+      band: edge.band,
+      households: rows.length,
+      vulnerable,
+      rate: rows.length === 0 ? 0 : Number(((vulnerable / rows.length) * 100).toFixed(1)),
+    }
+  })

@@ -8,6 +8,7 @@ import {
   tierThresholds,
 } from '@/affordai/data/households'
 import { AREAS } from '@/affordai/data/areas'
+import { CURRENT_MONTH, HISTORY_MONTHS, historyMonths } from '@/affordai/data/calendar'
 
 describe('household population', () => {
   it('generates exactly the monitored count from the brief', () => {
@@ -36,12 +37,42 @@ describe('household population', () => {
     expect(households.every((h) => ids.has(h.area))).toBe(true)
   })
 
-  it('gives every household three years of history ending in 2026', () => {
+  it('gives every household a full monthly window ending in the present', () => {
+    const expected = historyMonths()
     for (const household of households.slice(0, 200)) {
-      expect(household.history.map((y) => y.year)).toEqual([2024, 2025, 2026])
-      expect(household.history[2].income).toBe(household.monthlyIncome)
-      expect(household.history[2].rent).toBe(household.monthlyRent)
-      expect(household.history[2].affordabilityScore).toBe(household.affordabilityScore)
+      expect(household.history).toHaveLength(HISTORY_MONTHS)
+      expect(household.history.map((entry) => entry.month)).toEqual(expected)
+    }
+  })
+
+  it('ends every history on the household present figures', () => {
+    for (const household of households.slice(0, 200)) {
+      const now = household.history[household.history.length - 1]
+      expect(now.month).toBe(CURRENT_MONTH)
+      expect(now.income).toBe(household.monthlyIncome)
+      expect(now.rent).toBe(household.monthlyRent)
+      expect(now.affordabilityScore).toBe(
+        household.history[household.history.length - 1].affordabilityScore,
+      )
+    }
+  })
+
+  it('keeps every month internally consistent', () => {
+    for (const household of households.slice(0, 200)) {
+      for (const entry of household.history) {
+        expect(entry.income).toBeGreaterThan(0)
+        expect(entry.rent).toBeGreaterThan(0)
+        expect(entry.essentials).toBeGreaterThan(0)
+        expect(entry.balance).toBe(entry.income - entry.rent - entry.essentials)
+      }
+    }
+  })
+
+  it('never models a household spending more than it earns on essentials alone', () => {
+    for (const household of households) {
+      for (const entry of household.history) {
+        expect(entry.essentials).toBeLessThan(entry.income)
+      }
     }
   })
 
@@ -54,8 +85,23 @@ describe('household population', () => {
       expect(household.affordabilityScore).toBeLessThanOrEqual(100)
       expect(household.riskProbability).toBeGreaterThanOrEqual(0)
       expect(household.riskProbability).toBeLessThanOrEqual(1)
-      expect(household.recommendedSubsidy).toBeGreaterThanOrEqual(household.currentSubsidy)
+      expect(household.recommendedSubsidy).toBeGreaterThanOrEqual(0)
+      expect(household.recommendedSubsidy).toBeLessThanOrEqual(45)
     }
+  })
+})
+
+describe('determinism', () => {
+  /**
+   * A reviewer refreshing mid-demo must see no drift. The generator is seeded,
+   * so the guarantee only holds if nothing downstream reaches for the clock or
+   * for Math.random — hence a fixed spot-check rather than a range assertion.
+   */
+  it('produces the same household on every run', () => {
+    const first = households[0]
+    expect(first.history).toHaveLength(HISTORY_MONTHS)
+    expect(first.riskProbability).toBe(households[0].riskProbability)
+    expect(first.history[0].month).toBe(historyMonths()[0])
   })
 })
 

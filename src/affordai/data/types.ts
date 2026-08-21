@@ -6,10 +6,22 @@ export type EmploymentStability = 'High' | 'Medium' | 'Low'
 
 export type TimeRange = '30d' | '90d' | '6m' | '1y'
 
-export interface HouseholdYear {
-  year: number
+/**
+ * One month of a household's ledger. The risk model reads trends, not snapshots
+ * — a household can still have income while its income falls, its rent climbs,
+ * and its balance turns negative — so history is monthly, not annual.
+ *
+ * Ordered oldest to newest. The last entry is always the household's present.
+ */
+export interface HouseholdMonth {
+  /** Calendar month, `YYYY-MM`. */
+  month: string
   income: number
   rent: number
+  /** Food, utilities, transport, medicine and basic schooling combined. */
+  essentials: number
+  /** `income - rent - essentials`. Negative means the month did not balance. */
+  balance: number
   affordabilityScore: number
 }
 
@@ -25,8 +37,10 @@ export interface Household {
   affordabilityScore: number
   rentBurden: number
   tier: Tier
+  /** Model output. Probability of entering vulnerability inside the horizon. */
   riskProbability: number
-  history: HouseholdYear[]
+  /** Twenty-four months, oldest first. The last entry is the present. */
+  history: HouseholdMonth[]
 }
 
 export interface Area {
