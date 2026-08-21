@@ -79,7 +79,9 @@ export const AFFORD_SOURCES: AffordSource[] = [
 
   // Protected — the record types that would be needed to make the caseload
   // real. Neither has a public aggregate, which is why the population below
-  // them is simulated rather than sampled.
+  // them is simulated rather than sampled. The last entry is `unpublished`
+  // rather than `protected`: nobody is withholding subregional rent for
+  // privacy, it simply is not broken out at that granularity.
   {
     name: 'Household income and rent records — individual level',
     status: 'protected',
@@ -98,7 +100,7 @@ export const AFFORD_SOURCES: AffordSource[] = [
   },
   {
     name: 'Subregional (neighbourhood) rent and income',
-    status: 'protected',
+    status: 'unpublished',
     dataAsOf: 'N/A',
     lastVerified: 'August 2026',
     tier: 'simulated',

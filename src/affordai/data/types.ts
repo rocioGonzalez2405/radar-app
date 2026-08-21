@@ -168,7 +168,13 @@ export type ProvenanceTier = 'verified' | 'reported' | 'simulated'
 
 export interface AffordSource {
   name: string
-  status: 'public' | 'protected'
+  /**
+   * Radar's `SourceEntry` only distinguishes `public` from `protected`. This
+   * console needs a third case: figures that are neither published nor withheld
+   * for privacy, but simply not broken out at the granularity shown here.
+   * Filing those under `protected` would misstate why they are missing.
+   */
+  status: 'public' | 'protected' | 'unpublished'
   dataAsOf: string
   lastVerified: string
   tier: ProvenanceTier

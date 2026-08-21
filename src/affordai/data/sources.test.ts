@@ -6,7 +6,7 @@ describe('source registry', () => {
   it('mirrors the shape Radar uses for its Sources page', () => {
     for (const source of AFFORD_SOURCES) {
       expect(source.name.length).toBeGreaterThan(0)
-      expect(['public', 'protected']).toContain(source.status)
+      expect(['public', 'protected', 'unpublished']).toContain(source.status)
       expect(source.dataAsOf.length).toBeGreaterThan(0)
       expect(source.lastVerified.length).toBeGreaterThan(0)
       expect(['verified', 'reported', 'simulated']).toContain(source.tier)
