@@ -6,6 +6,7 @@ import { MetricRow } from '@/affordai/components/MetricRow'
 import { RiskAssessmentCard } from '@/affordai/components/RiskAssessmentCard'
 import { TierBadge } from '@/affordai/components/TierBadge'
 import { areaById } from '@/affordai/data/areas'
+import { formatMonth } from '@/affordai/data/calendar'
 import { householdById } from '@/affordai/data/selectors'
 
 export const HouseholdDetailPage = () => {
@@ -26,13 +27,23 @@ export const HouseholdDetailPage = () => {
     )
   }
 
-  const timeline = household.history.map((year) => ({
-    year: String(year.year),
-    income: year.income,
-    rent: year.rent,
-    score: year.affordabilityScore,
+  const timeline = household.history.map((month) => ({
+    label: formatMonth(month.month),
+    income: month.income,
+    rent: month.rent,
+    score: month.affordabilityScore,
   }))
-  const [first, , last] = household.history
+
+  // Index the ends explicitly. Positional destructuring read the third entry as
+  // "last" back when the ledger was three annual points, and would still compile.
+  const first = household.history[0]
+  const last = household.history[household.history.length - 1]
+  const negativeMonths = household.history.filter((month) => month.balance < 0).length
+
+  const change = (from: number, to: number) => {
+    const delta = ((to - from) / from) * 100
+    return `${delta > 0 ? '+' : ''}${delta.toFixed(1)}%`
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -80,49 +91,82 @@ export const HouseholdDetailPage = () => {
             value={`${household.recommendedSubsidy}%`}
             tone="danger"
           />
+          <Footnote>
+            The recommended percentage is this household's own model output. It will not
+            match the average target published for {areaById(household.area).label} —
+            the area figure answers <b>how much a program should budget for a region</b>,
+            this one answers <b>what this household needs</b>. They are different
+            questions, so they do not have to agree.
+          </Footnote>
         </Card>
 
         <Card>
           <SectionHead
             title="Financial timeline"
-            note={`${first.year} – ${last.year}`}
+            note={`${household.history.length} months · ${formatMonth(
+              first.month,
+            )} – ${formatMonth(last.month)}`}
           />
           <div className="h-[280px]">
             <ScoreTimelineChart data={timeline} />
           </div>
+
+          {/* Twenty-four months will not render as twenty-four cards. The chart
+              carries the shape; this row carries the endpoints and the change
+              between them, which is what the model actually reads. */}
           <div className="mt-3 grid grid-cols-3 gap-3 max-sm:grid-cols-1">
-            {household.history.map((year) => (
+            {(
+              [
+                { label: 'Monthly income', from: first.income, to: last.income, money: true },
+                { label: 'Monthly rent', from: first.rent, to: last.rent, money: true },
+                {
+                  label: 'Affordability score',
+                  from: first.affordabilityScore,
+                  to: last.affordabilityScore,
+                  money: false,
+                },
+              ] as const
+            ).map((row) => (
               <div
-                key={year.year}
+                key={row.label}
                 className="rounded-lg border border-line-soft bg-ink-2 p-3"
               >
                 <div className="mb-1.5 font-mono text-[11px] text-text-low">
-                  {year.year}
+                  {row.label}
                 </div>
-                <div className="font-mono text-[12px] text-text-mid">
-                  Income{' '}
-                  <span className="text-text-hi">
-                    ${year.income.toLocaleString('en-US')}
+                <div className="font-mono text-[13px] text-text-mid">
+                  {row.money ? `$${row.from.toLocaleString('en-US')}` : row.from}
+                  <span className="mx-1.5 text-text-low">→</span>
+                  <span className="text-[15px] font-semibold text-text-hi">
+                    {row.money ? `$${row.to.toLocaleString('en-US')}` : row.to}
                   </span>
                 </div>
-                <div className="font-mono text-[12px] text-text-mid">
-                  Rent{' '}
-                  <span className="text-text-hi">
-                    ${year.rent.toLocaleString('en-US')}
-                  </span>
-                </div>
-                <div className="font-mono text-[12px] text-text-mid">
-                  Affordability score{' '}
-                  <span className="text-[15px] font-semibold text-coral">
-                    {year.affordabilityScore}
-                  </span>
+                <div
+                  className={`mt-1 font-mono text-[12px] ${
+                    row.to < row.from ? 'text-coral' : 'text-teal'
+                  }`}
+                >
+                  {change(row.from, row.to)} over {household.history.length} months
                 </div>
               </div>
             ))}
           </div>
+
+          {negativeMonths > 0 && (
+            <div className="mt-3 rounded-lg border border-coral/40 bg-coral-dim px-3.5 py-2.5">
+              <span className="font-mono text-[12px] text-coral">
+                {negativeMonths} of {household.history.length} months did not balance
+              </span>
+              <span className="ml-2 text-[12px] text-text-mid">
+                — income did not cover rent plus essentials
+              </span>
+            </div>
+          )}
+
           <Footnote>
             Income and rent read on the left axis, affordability score on the right.
-            Scores are <b>estimated</b> and are not a credit assessment.
+            Ticks are thinned to every third month. Scores are <b>estimated</b> and are
+            not a credit assessment.
           </Footnote>
         </Card>
       </div>

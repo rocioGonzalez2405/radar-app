@@ -3,6 +3,7 @@ import { Card, SectionHead } from '@/shared/ui/Card'
 import { AiRationale } from '@/affordai/components/AiRationale'
 import { FactorBars } from '@/affordai/components/FactorBars'
 import { Disclaimer } from '@/affordai/components/Disclaimer'
+import { formatMonth } from '@/affordai/data/calendar'
 import { factorsFor } from '@/affordai/data/factors'
 import { useAffordStore } from '@/affordai/state/AffordStore'
 import type { Household, Tier } from '@/affordai/data/types'
@@ -23,9 +24,14 @@ export const RiskAssessmentCard = ({ household }: { household: Household }) => {
     (entry) => entry.householdId === household.id,
   )
 
-  const [first, , last] = household.history
+  // The ledger is 24 monthly entries, oldest first. Index the ends explicitly:
+  // positional destructuring silently read the third month as "last" when the
+  // history was three annual points, and would keep compiling here.
+  const first = household.history[0]
+  const last = household.history[household.history.length - 1]
   const incomeChange = ((last.income - first.income) / first.income) * 100
   const rentChange = ((last.rent - first.rent) / first.rent) * 100
+  const negativeMonths = household.history.filter((month) => month.balance < 0).length
   const horizonDays = 90
   const probability = Math.round(household.riskProbability * 100)
 
@@ -53,14 +59,16 @@ export const RiskAssessmentCard = ({ household }: { household: Household }) => {
         <AiRationale
           whatHappened={`Estimated monthly income changed ${signed(
             incomeChange,
-          )} while monthly rent changed ${signed(rentChange)} between ${first.year} and ${
-            last.year
-          }.`}
+          )} while monthly rent changed ${signed(rentChange)} between ${formatMonth(
+            first.month,
+          )} and ${formatMonth(last.month)}.`}
           whyItMatters={`This moved the household's housing burden to ${(
             household.rentBurden * 100
-          ).toFixed(
-            1,
-          )}% of income, above the regional threshold the model associates with tier changes.`}
+          ).toFixed(1)}% of income${
+            negativeMonths > 0
+              ? `, and ${negativeMonths} of the last ${household.history.length} months did not balance`
+              : ''
+          }. The model reads the trend, not the latest month alone.`}
           modelPrediction={`The model predicts a ${probability}% probability of increased financial vulnerability within ${horizonDays} days, based on available data.`}
           recommendedAction={`Temporary ${household.recommendedSubsidy}% food subsidy, up from the current ${household.currentSubsidy}%.`}
         />
