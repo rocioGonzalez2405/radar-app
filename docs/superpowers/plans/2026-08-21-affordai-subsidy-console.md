@@ -49,6 +49,63 @@ Radar's top bar stays visible above AffordAI and marks **AffordAI** as the activ
 - Task 19's cross-link steps are obsolete: the top-bar entry exists, and the "← Radar console" link in the sidebar footer is no longer needed because the top bar never leaves.
 - The sidebar is not sticky. Long pages scroll past it. Making it sticky needs a magic offset matching `AppShell`'s header height, which is why it was left out; add it only after measuring in a browser.
 
+## Structural amendment 2 — monthly history and a real model layer
+
+Owned by a peer session, not by this plan's executor. Agreed boundary: that session owns `src/affordai/data/{types,households,heroes,calendar}.ts` and all of `src/affordai/model/**`. This plan's executor owns every page and component, and this document. **Do not edit the peer-owned files.**
+
+This amendment supersedes the three-annual-point history that Tasks 1–3, 3b, and 12 were written against. The driver was an ML proposal the user brought in, which asks for two things this plan did not have: trends rather than snapshots feeding the prediction, and the risk model kept as a separate component from the subsidy policy.
+
+**The new shape** — settled, code against it:
+
+```ts
+export interface HouseholdMonth {
+  month: string        // 'YYYY-MM', e.g. '2026-08'
+  income: number
+  rent: number
+  essentials: number   // food, utilities, transport, medicine, basic schooling
+  balance: number      // income - rent - essentials; negative = did not balance
+  affordabilityScore: number
+}
+
+Household.history: HouseholdMonth[]   // exactly 24, oldest first, last === present
+```
+
+`HouseholdYear` is gone. `.year` becomes `.month`. A new `src/affordai/data/calendar.ts` provides `HISTORY_MONTHS` (24), `CURRENT_MONTH` (`'2026-08'`), `historyMonths(count?)`, and `formatMonth('2026-08') → 'Aug 2026'`. **Use `formatMonth` for every chart label and month display.** Twenty-four points is dense for an axis; thinning to every third tick is a presentation choice, not a requirement.
+
+**What else moved under this plan:**
+
+1. **`riskProbability` and `recommendedSubsidy` are model outputs, not authored fields.** Every household including the heroes runs through `model/features.ts → model/riskModel.ts → model/subsidyEngine.ts`.
+
+2. **`factorsFor(household)` keeps its signature** and still returns `RiskFactor[]` summing to 100, so `FactorBars` needs no change — but the contributions are now the model's own arithmetic. In a logistic model the Shapley value is exactly `coefficient × (feature − baseline)`, so the bars stop being a hand-written table.
+
+3. **Two new hero households**, both exported from `data/heroes.ts`:
+   - `STABLE_HOUSEHOLD_ID = 10105` — risk 0.01, recommends 0%
+   - `DETERIORATING_HOUSEHOLD_ID = 10731` — score 70, tier `stable`, risk 0.70, recommends 12%
+
+   **#10731 must appear in the UI.** Its descriptive score and its tier both read "fine" and the model flags it anyway, off the trends alone. That is the strongest argument this product has and it is better than anything in the original brief — a threshold on a score cannot produce it. Give it a place: a callout on the Households list, on Predictions, or both. `#10105` works as the contrast case beside it.
+
+### The brief's figures are no longer literals
+
+The user decided: **the model speaks.** Nothing is tuned to hit a number from the brief.
+
+The coefficients are shared across all 12,482 households, so moving one to make a single household land on 0.82 moves every other prediction with it. That is not calibration, it is fitting a model to a point that came off a slide. And a model that outputs exactly 0.82 and exactly 27% is a model that gets found out in two questions; 0.81 from real arithmetic is worth more.
+
+| Brief says | Model gives |
+| --- | --- |
+| 82% risk probability | 0.81 |
+| 27% recommended subsidy | 24% |
+
+**Consequences for every remaining task:**
+
+- **Never hardcode a household figure in copy.** Interpolate it from the household object. `Math.round(household.riskProbability * 100)` for the probability, `household.recommendedSubsidy` for the intervention. A task's browser check that names a literal is describing today's output, not a requirement — if the model moves, the page must move with it and the check is what gets updated.
+- **Task 12's three year cards are obsolete.** Twenty-four months will not render as twenty-four cards. Replace them with a summary — first month, current month, and the change between them — and let the chart carry the shape of the deterioration.
+- **Task 18's Settings page is now worth building properly.** The percentile-cut threshold pair it displays is obsolete. Show the model instead: the logistic coefficients and the risk→percentage band table the subsidy engine implements. That turns Settings from a decorative read-only page into the one place an administrator can see what the model actually does.
+- **Task 19's demo walkthrough must not quote figures.** Rewritten below to name the source of truth instead, so the script cannot drift from the model again.
+
+### Known open point
+
+The Eastside **area** recommendation is 18% → 25% and cites verified cost-burden data. A household at 24% therefore sits *below* its own area's figure. This is not a data defect and the area recommendation must not be bent to fix it — it is a UI copy problem. The Household detail page must say plainly that the area figure is an average target across qualifying households while the household figure is this household's own model output. Handle it in words, not in numbers.
+
 ## Verification Commands
 
 | Command | When |
@@ -4092,6 +4149,8 @@ Expected: no output, exit 0.
 
 - [ ] **Step 5: Browser check — the hero household**
 
+> **SUPERSEDED by Structural amendment 2.** Task 12 shipped in commit `e0f999e` against the three-annual-point history and is now broken by the monthly shape: `RiskAssessmentCard.tsx:56-57` and `HouseholdDetailPage.tsx:30, 88, 96, 100` read `.year`, which no longer exists. When the peer session's commit lands, adapt those two files — `.year` → `.month`, `formatMonth` for labels, the three year cards replaced by a first/current/change summary — and re-verify against the list below with two corrections: the probability and the recommended subsidy are **model outputs**, so verify they equal `householdById(10482).riskProbability × 100` and `.recommendedSubsidy` rather than the literals written here. The literals below record what the authored data produced, not a requirement.
+
 Open `http://localhost:5175/affordai/households/10482`. Confirm every figure:
 - Heading **Household #10482** with a **High risk** badge, subtitle **Eastside**
 - Profile: size **4**, income **$4,200**, rent **$1,850**, rent burden **44.0%**, employment stability **Medium**, location **Eastside**, current subsidy **18%**, recommended subsidy **27%**
@@ -5385,10 +5444,10 @@ This is the acceptance criterion for the whole plan. Reload first so the store s
 2. The vulnerability chart shows the vulnerable bands growing; the AI insight names 11.8%
 3. In Geographic view, select **Eastside** — the highest vulnerability rate of the four
 4. Go to Households, search `10482`, open it
-5. The financial timeline shows income falling 4,600 → 4,200 and rent rising 1,500 → 1,850, score 78 → 57
-6. The assessment card reads **High Risk**, **82%** within 90 days
-7. Expand the factor bars — Rent burden 34% leads
-8. The recommended intervention reads **Temporary 27% food subsidy**
+5. The financial timeline shows 24 months with income trending down, rent trending up, and the affordability score falling — the deterioration must be obvious from the shape of the lines, without reading a number
+6. The assessment card reads **High Risk** with the model's probability over a 90-day horizon. **Do not check this against a literal.** The number is `Math.round(household.riskProbability * 100)`; whatever the model returns is correct. What you are verifying is that the page renders the model's value and not a hardcoded one — confirm by checking the rendered figure equals `householdById(10482).riskProbability × 100`
+7. Expand the factor bars — five contributions summing to 100, derived from the model rather than a table. Rent burden should lead, because that is what the coefficients say, not because the plan says so
+8. The recommended intervention names `household.recommendedSubsidy`, again interpolated and not literal. Verify the rendered percentage equals `householdById(10482).recommendedSubsidy`
 9. Click **Approve intervention** — the card switches to the approved state
 10. Go to Impact — households stabilized reads 1,285 (`+1 this session`) and the hero metric reads **413**
 
