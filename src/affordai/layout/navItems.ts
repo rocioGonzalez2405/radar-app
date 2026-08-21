@@ -13,4 +13,5 @@ export const NAV_ITEMS: NavItem[] = [
   { to: ROUTES.affordai.overview, label: 'Overview' },
   { to: ROUTES.affordai.households, label: 'Households' },
   { to: ROUTES.affordai.vulnerability, label: 'Vulnerability' },
+  { to: ROUTES.affordai.predictions, label: 'Predictions' },
 ]
