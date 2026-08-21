@@ -3,11 +3,11 @@ import { NavLink, Outlet } from 'react-router'
 import { ROUTES } from '@/app/routes'
 
 const NAV_ITEMS = [
-  { to: ROUTES.triage, label: 'Triage' },
-  { to: ROUTES.forecast, label: 'Forecast' },
-  { to: ROUTES.capacity, label: 'Capacity' },
-  { to: ROUTES.simulator, label: 'Simulator' },
-  { to: ROUTES.sources, label: 'Sources' },
+  { to: ROUTES.radar.triage, label: 'Triage' },
+  { to: ROUTES.radar.forecast, label: 'Forecast' },
+  { to: ROUTES.radar.capacity, label: 'Capacity' },
+  { to: ROUTES.radar.simulator, label: 'Simulator' },
+  { to: ROUTES.radar.sources, label: 'Sources' },
 ]
 
 const navLinkClass = (isActive: boolean) =>
@@ -24,7 +24,7 @@ export const AppShell = () => {
     <div className="min-h-screen bg-ink-0 pb-16">
       <header className="sticky top-0 z-50 border-b border-line bg-ink-1">
         <div className="flex items-center justify-between px-8 py-4 max-md:px-4">
-          <NavLink to={ROUTES.triage} className="flex items-center gap-3">
+          <NavLink to={ROUTES.radar.triage} className="flex items-center gap-3">
             <div className="flex h-[30px] w-[30px] flex-shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-coral to-amber font-mono text-[13px] font-bold text-[#1a0f0a]">
               R
             </div>
@@ -41,7 +41,7 @@ export const AppShell = () => {
               <NavLink
                 key={item.to}
                 to={item.to}
-                end={item.to === ROUTES.triage}
+                end={item.to === ROUTES.radar.triage}
                 className={({ isActive }) => navLinkClass(isActive)}
               >
                 {item.label}
@@ -55,7 +55,7 @@ export const AppShell = () => {
               live · updated 6 min ago
             </span>
             <NavLink
-              to={ROUTES.donate}
+              to={ROUTES.radar.donate}
               className="hidden rounded-full bg-coral px-4 py-1.5 text-sm font-semibold text-[#1a0f0a] hover:bg-coral/90 md:inline-flex"
             >
               Donate
@@ -76,7 +76,7 @@ export const AppShell = () => {
               <NavLink
                 key={item.to}
                 to={item.to}
-                end={item.to === ROUTES.triage}
+                end={item.to === ROUTES.radar.triage}
                 className={({ isActive }) => navLinkClass(isActive)}
                 onClick={() => setNavOpen(false)}
               >
@@ -84,7 +84,7 @@ export const AppShell = () => {
               </NavLink>
             ))}
             <NavLink
-              to={ROUTES.donate}
+              to={ROUTES.radar.donate}
               className="inline-flex w-fit rounded-full bg-coral px-4 py-1.5 text-sm font-semibold text-[#1a0f0a]"
               onClick={() => setNavOpen(false)}
             >
