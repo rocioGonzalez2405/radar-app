@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy Nothing Community Discovery</title>
+    <style>
+        @font-face {
+            font-family: 'Charter';
+            src: url('data:font/woff2;base64,d09GMgABBAAAABKgAA8AAAAAI9wAABJOAAEAAAAAAAAAAAAAAAAAAAAAAAAAGhgbhj4cUVRJRmRPRyhoZgE2NgoLHgggBIFuATYCJAECJAoLCFoAAIAeAHgbGwAA') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        :root {
+            /* Light theme - default */
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #EDE4D3;
+            --bg-tertiary: #F5F3ED;
+            --text-primary: #1A1A1A;
+            --text-secondary: #3F4A52;
+            --text-tertiary: #8B8B8B;
+            --accent-primary: #2D5F3F;
+            --accent-warm: #C97033;
+            --accent-soft: #E8D4C8;
+            --border: #E0D5C7;
+            --success: #3A7D5D;
+            --warning: #D97706;
+            --neutral-ink: #3F4A52;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --bg-primary: #1A1A1A;
+                --bg-secondary: #2D2D2D;
+                --bg-tertiary: #3A3A3A;
+                --text-primary: #FFFFFF;
+                --text-secondary: #E0E0E0;
+                --text-tertiary: #A0A0A0;
+                --accent-primary: #7DB89D;
+                --accent-warm: #E8A87C;
+                --accent-soft: #5A4A42;
+                --border: #404040;
+                --success: #6BA886;
+                --warning: #F59E0B;
+            }
+        }
+
+        :root[data-theme="dark"] {
+            --bg-primary: #1A1A1A;
+            --bg-secondary: #2D2D2D;
+            --bg-tertiary: #3A3A3A;
+            --text-primary: #FFFFFF;
+            --text-secondary: #E0E0E0;
+            --text-tertiary: #A0A0A0;
+            --accent-primary: #7DB89D;
+            --accent-warm: #E8A87C;
+            --accent-soft: #5A4A42;
+            --border: #404040;
+            --success: #6BA886;
+            --warning: #F59E0B;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            letter-spacing: 0;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Charter', Georgia, serif;
+            font-weight: 600;
+            text-wrap: balance;
+        }
+
+        h1 { font-size: 2.5rem; line-height: 1.2; margin-bottom: 1rem; color: var(--text-primary); }
+        h2 { font-size: 1.75rem; line-height: 1.3; margin-bottom: 0.75rem; color: var(--text-primary); }
+        h3 { font-size: 1.25rem; line-height: 1.4; margin-bottom: 0.5rem; color: var(--text-secondary); }
+
+        .screen {
+            display: none;
+            padding: 2rem;
+            max-width: 100%;
+            background: var(--bg-primary);
+            min-height: 100vh;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .screen-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .screen-grid.single {
+            grid-template-columns: 1fr;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header Navigation */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-family: 'Charter', Georgia, serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .nav {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-item {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            color: var(--accent-primary);
+            background: var(--accent-soft);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .card-tight {
+            padding: 1rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .card-tag {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--accent-primary);
+            background: var(--accent-soft);
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            width: fit-content;
+        }
+
+        .card-meta {
+            font-size: 0.85rem;
+            color: var(--text-tertiary);
+            margin-top: 1rem;
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        /* Radar Insight Box */
+        .radar-insight {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-soft) 100%);
+            border-left: 4px solid var(--accent-primary);
+            color: var(--text-primary);
+            padding: 1.5rem;
+            border-radius: 6px;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .radar-insight strong {
+            display: block;
+            font-family: 'Charter', Georgia, serif;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .radar-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            opacity: 0.8;
+            margin-bottom: 0.25rem;
+            font-weight: 700;
+        }
+
+        /* Impact Metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .metric-cell {
+            background: var(--bg-tertiary);
+            padding: 1.5rem;
+            border-radius: 6px;
+            border-left: 4px solid var(--accent-primary);
+            text-align: center;
+        }
+
+        .metric-cell.warm {
+            border-left-color: var(--accent-warm);
+        }
+
+        .metric-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-cell.warm .metric-value {
+            color: var(--accent-warm);
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Trade Cards */
+        .trade-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .trade-header {
+            background: var(--accent-soft);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .trade-org {
+            font-weight: 600;
+            color: var(--accent-primary);
+        }
+
+        .trade-status {
+            font-size: 0.75rem;
+            padding: 0.35rem 0.7rem;
+            border-radius: 3px;
+            background: var(--success);
+            color: white;
+            font-weight: 700;
+        }
+
+        .trade-body {
+            padding: 1.5rem;
+        }
+
+        .trade-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .trade-detail {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin: 0.5rem 0;
+        }
+
+        .trade-detail strong {
+            color: var(--text-primary);
+        }
+
+        .trade-impact {
+            background: var(--accent-soft);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            border-left: 3px solid var(--accent-warm);
+        }
+
+        /* Nonprofit Card */
+        .nonprofit-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .nonprofit-header {
+            margin-bottom: 1rem;
+        }
+
+        .nonprofit-name {
+            font-family: 'Charter', Georgia, serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .nonprofit-mission {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .needs-list {
+            background: var(--bg-tertiary);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+
+        .needs-list h4 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .need-item {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .need-item:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--accent-warm);
+            font-weight: 700;
+        }
+
+        .cta-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-primary);
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: var(--accent-soft);
+            color: var(--accent-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-tertiary);
+        }
+
+        /* Filter / View Toggle */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-pill {
+            padding: 0.6rem 1.2rem;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-pill:hover, .filter-pill.active {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--bg-secondary);
+            padding: 0.25rem;
+            border-radius: 4px;
+        }
+
+        .view-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.9rem;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .view-btn.active {
+            background: var(--bg-primary);
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-family: 'Charter', Georgia, serif;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        /* Search */
+        .search-box {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Diagram */
+        .diagram-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+            overflow-x: auto;
+        }
+
+        .diagram-title {
+            font-family: 'Charter', Georgia, serif;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        svg {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .flow-label {
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 3rem;
+        }
+
+        .timeline-item {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: -1.5rem;
+            top: 0.5rem;
+            width: 12px;
+            height: 12px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            border: 2px solid var(--bg-primary);
+            box-shadow: 0 0 0 2px var(--accent-primary);
+        }
+
+        .timeline-item:after {
+            content: '';
+            position: absolute;
+            left: -1.4rem;
+            top: 1.5rem;
+            width: 2px;
+            height: calc(100% + 0.5rem);
+            background: var(--border);
+        }
+
+        .timeline-item:last-child:after {
+            display: none;
+        }
+
+        .timeline-date {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-tertiary);
+            margin-bottom: 0.25rem;
+        }
+
+        .timeline-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+        }
+
+        /* Icon substitute */
+        .icon-pill {
+            display: inline-block;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background: var(--accent-soft);
+            color: var(--accent-primary);
+            font-weight: 700;
+            font-size: 1rem;
+            text-align: center;
+            line-height: 2rem;
+            margin-right: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .screen-grid {
+                grid-template-columns: 1fr;
+            }
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            .cta-group {
+                grid-template-columns: 1fr;
+            }
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.5rem; }
+        }
+
+        .intro {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 2rem;
+            max-width: 700px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Screen 1: Browse Map View -->
+    <div class="screen active" id="screen-browse">
+        <div class="header">
+            <div class="logo">Buy Nothing</div>
+            <ul class="nav">
+                <li class="nav-item active" onclick="showScreen('screen-browse')">Browse</li>
+                <li class="nav-item" onclick="showScreen('screen-context')">Impact</li>
+                <li class="nav-item" onclick="showScreen('screen-nonprofit')">Find Help</li>
+                <li class="nav-item" onclick="showScreen('screen-dashboard')">Dashboard</li>
+                <li class="nav-item" onclick="showScreen('screen-flows')">Flows</li>
+            </ul>
+        </div>
+
+        <div class="container">
+            <h1>These nonprofits are trading near you</h1>
+            <p class="intro">Real resources rebalancing in real time. See what's happening, why it matters, and how you can help.</p>
+
+            <div class="controls">
+                <div class="filter-group">
+                    <span style="font-size: 0.85rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin: auto 0;">Filter by population:</span>
+                    <span class="filter-pill active">All</span>
+                    <span class="filter-pill">Age 55+</span>
+                    <span class="filter-pill">Families</span>
+                    <span class="filter-pill">Unhoused</span>
+                    <span class="filter-pill">Veterans</span>
+                </div>
+                <div class="view-toggle">
+                    <button class="view-btn active">Map</button>
+                    <button class="view-btn" onclick="showScreen('screen-timeline')">Timeline</button>
+                </div>
+            </div>
+
+            <!-- Map placeholder -->
+            <div class="card" style="padding: 3rem; text-align: center; background: var(--bg-tertiary); border: 2px dashed var(--border); min-height: 400px; display: flex; flex-direction: column; justify-content: center;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📍</div>
+                <h3>Interactive Map View</h3>
+                <p style="color: var(--text-tertiary); margin-top: 0.5rem; font-size: 0.9rem;">Map showing active trades, filtered by geography and population served. Zoom, pan, click cards for details.</p>
+            </div>
+
+            <!-- Featured trades -->
+            <div class="section" style="margin-top: 3rem;">
+                <h2 style="margin-bottom: 1.5rem;">This week's active trades</h2>
+                <div class="grid-2">
+                    <!-- Trade 1 -->
+                    <div class="trade-card">
+                        <div class="trade-header">
+                            <div class="trade-org">Eastside Senior Collective</div>
+                            <div class="trade-status">Live</div>
+                        </div>
+                        <div class="trade-body">
+                            <div class="trade-title">50 Adult Day Program Beds → Community Care Center</div>
+                            <div class="trade-detail">
+                                <span>For:</span>
+                                <strong>Age 55+ / Low-income</strong>
+                            </div>
+                            <div class="trade-detail">
+                                <span>Distance:</span>
+                                <strong>3.2 km</strong>
+                            </div>
+                            <div class="trade-detail">
+                                <span>Impact:</span>
+                                <strong>+40% capacity</strong>
+                            </div>
+                            <div class="radar-insight">
+                                <div class="radar-label">Radar Insight</div>
+                                <strong>Why this trade:</strong> Population aged 55+ increased 8% in this district. Eastside Senior Collective was at 94% capacity. This rebalancing matches growing demand to available resources.
+                            </div>
+                            <div class="trade-impact">
+                                <strong>→</strong> Frees up 50 beds in one location to serve 6 seniors per bed across 3 distribution sites
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trade 2 -->
+                    <div class="trade-card">
+                        <div class="trade-header">
+                            <div class="trade-org">North District Family Services</div>
+                            <div class="trade-status">Live</div>
+                        </div>
+                        <div class="trade-body">
+                            <div class="trade-title">$120k in School Supplies + Learning Materials</div>
+                            <div class="trade-detail">
+                                <span>For:</span>
+                                <strong>Families / Children</strong>
+                            </div>
+                            <div class="trade-detail">
+                                <span>Distance:</span>
+                                <strong>1.8 km</strong>
+                            </div>
+                            <div class="trade-detail">
+                                <span>Impact:</span>
+                                <strong>350 students reached</strong>
+                            </div>
+                            <div class="radar-insight">
+                                <div class="radar-label">Radar Insight</div>
+                                <strong>Why this trade:</strong> Back-to-school surge predicted. North District has surplus from June donations; three other orgs are resource-constrained. This trade equips schools before Sept 1.
+                            </div>
+                            <div class="trade-impact">
+                                <strong>→</strong> Supplies reaching low-income families 2 weeks earlier than forecast
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Education callout -->
+            <div style="background: var(--accent-soft); border-radius: 8px; padding: 2rem; margin-top: 3rem; border-left: 4px solid var(--accent-primary);">
+                <h3 style="color: var(--accent-primary); margin-bottom: 0.75rem;">How Buy Nothing works</h3>
+                <p style="color: var(--text-secondary); line-height: 1.7;">Nonprofits see what they have. Radar shows what peers need. They trade directly, no middleman. Resources move from surplus to shortage in days, not months. Every trade is tracked—so you see the real impact.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 2: Data-Driven Context -->
+    <div class="screen" id="screen-context">
+        <div class="header">
+            <div class="logo">Buy Nothing</div>
+            <ul class="nav">
+                <li class="nav-item" onclick="showScreen('screen-browse')">Browse</li>
+                <li class="nav-item active" onclick="showScreen('screen-context')">Impact</li>
+                <li class="nav-item" onclick="showScreen('screen-nonprofit')">Find Help</li>
+                <li class="nav-item" onclick="showScreen('screen-dashboard')">Dashboard</li>
+                <li class="nav-item" onclick="showScreen('screen-flows')">Flows</li>
+            </ul>
+        </div>
+
+        <div class="container">
+            <h1>Why each trade happens</h1>
+            <p class="intro">Behind every resource movement is data—population shifts, capacity crunches, and moments when fairness is possible.</p>
+
+            <div class="section">
+                <h2>Featured Trade Deep Dive</h2>
+
+                <div class="card" style="border-left: 4px solid var(--accent-primary); padding: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
+                        <div>
+                            <h3 style="color: var(--accent-primary);">100 Long-term Care Beds</h3>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">Grace Hospital Continuing Care Unit → 4 Partner Sites</p>
+                        </div>
+                        <div class="card-tag">In Progress</div>
+                    </div>
+
+                    <div class="radar-insight">
+                        <div class="radar-label">Radar Insight: Population Shift</div>
+                        <strong>Age 65+ population increased 12% YoY in this metro area</strong>
+                        <p style="margin-top: 0.5rem;">Grace Hospital is seeing more admissions but has limited long-term care beds. Four partner sites (Eastside Care, Community Health, Harbor House, Faith Networks) each have unfilled demand from their waitlists, but lacked certified beds.</p>
+                    </div>
+
+                    <div class="radar-insight" style="margin-top: 1.5rem;">
+                        <div class="radar-label">Radar Insight: Capacity Analysis</div>
+                        <strong>This rebalancing closes 3 critical gaps:</strong>
+                        <ul style="margin-top: 0.75rem; list-style: none;">
+                            <li style="margin: 0.5rem 0; padding-left: 1.5rem; position: relative;"><span style="position: absolute; left: 0;">•</span> Eastside: Waitlist drops 60% (seniors no longer wait 8+ weeks)</li>
+                            <li style="margin: 0.5rem 0; padding-left: 1.5rem; position: relative;"><span style="position: absolute; left: 0;">•</span> Community Health: Can accept referrals from ER (reduced boarding)</li>
+                            <li style="margin: 0.5rem 0; padding-left: 1.5rem; position: relative;"><span style="position: absolute; left: 0;">•</span> Harbor House: Opens memory care unit (Alzheimer's focus)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metrics from this trade -->
+            <div class="section">
+                <h2>Measurable impact</h2>
+                <div class="metrics-grid">
+                    <div class="metric-cell">
+                        <div class="metric-value">100</div>
+                        <div class="metric-label">Long-term care beds certified and deployed</div>
+                    </div>
+                    <div class="metric-cell warm">
+                        <div class="metric-value">850+</div>
+                        <div class="metric-label">Seniors served through waiting-list clearance</div>
+                    </div>
+                    <div class="metric-cell">
+                        <div class="metric-value">6 weeks</div>
+                        <div class="metric-label">Reduction in average admission wait time</div>
+                    </div>
+                    <div class="metric-cell warm">
+                        <div class="metric-value">$2.1M</div>
+                        <div class="metric-label">Hospital capacity freed (ER discharge, bed turnover)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Radar mechanics -->
+            <div class="section">
+                <h2 style="margin-bottom: 2rem;">How Radar identifies these opportunities</h2>
+                <div class="grid-2">
+                    <div class="card">
+                        <h3 style="color: var(--accent-primary); margin-bottom: 1rem;">1. Population Data</h3>
+                        <p>Census, health surveys, and demographic shifts. Radar watches population aging, migration, and disease prevalence changes by zipcode.</p>
+                    </div>
+                    <div class="card">
+                        <h3 style="color: var(--accent-primary); margin-bottom: 1rem;">2. Org Capacity Reports</h3>
+                        <p>Each nonprofit submits monthly: clients served, beds full/empty, waitlist length, which populations are underserved.</p>
+                    </div>
+                    <div class="card">
+                        <h3 style="color: var(--accent-primary); margin-bottom: 1rem;">3. Matching Algorithm</h3>
+                        <p>Radar matches surplus to shortage, prioritizing high-impact trades (moves most resources to highest-need areas).</p>
+                    </div>
+                    <div class="card">
+                        <h3 style="color: var(--accent-primary); margin-bottom: 1rem;">4. Fairness Check</h3>
+                        <p>Trade reduces wait times, increases diversity of care, and doesn't exploit any partner. Only then does Radar suggest it.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 3: Find a Nonprofit -->
+    <div class="screen" id="screen-nonprofit">
+        <div class="header">
+            <div class="logo">Buy Nothing</div>
+            <ul class="nav">
+                <li class="nav-item" onclick="showScreen('screen-browse')">Browse</li>
+                <li class="nav-item" onclick="showScreen('screen-context')">Impact</li>
+                <li class="nav-item active" onclick="showScreen('screen-nonprofit')">Find Help</li>
+                <li class="nav-item" onclick="showScreen('screen-dashboard')">Dashboard</li>
+                <li class="nav-item" onclick="showScreen('screen-flows')">Flows</li>
+            </ul>
+        </div>
+
+        <div class="container">
+            <h1>Find a nonprofit to help</h1>
+            <p class="intro">See real needs. Choose how you help—donate, volunteer, or refer people you know who need care.</p>
+
+            <input type="text" class="search-box" placeholder="Search by nonprofit name or population served (e.g., 'Age 55+', 'Families', 'Veterans')...">
+
+            <div class="controls">
+                <div class="filter-group">
+                    <span style="font-size: 0.85rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin: auto 0;">Population:</span>
+                    <span class="filter-pill active">All</span>
+                    <span class="filter-pill">Age 55+</span>
+                    <span class="filter-pill">Families</span>
+                    <span class="filter-pill">Unhoused</span>
+                    <span class="filter-pill">Veterans</span>
+                    <span class="filter-pill">BIPOC Communities</span>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="grid-2">
+                    <!-- Nonprofit 1 -->
+                    <div class="nonprofit-card">
+                        <div class="nonprofit-header">
+                            <div class="nonprofit-name">Eastside Senior Collective</div>
+                            <p style="font-size: 0.8rem; color: var(--text-tertiary);">Serves East District • 4,200 seniors annually</p>
+                        </div>
+
+                        <div class="nonprofit-mission">
+                            "We keep seniors independent and connected. Through day programs, home care coordination, and community events, we help aging adults stay in their neighborhoods."
+                        </div>
+
+                        <div class="needs-list">
+                            <h4>Unmet needs (right now)</h4>
+                            <div class="need-item">50 more day program slots (6-month waitlist)</div>
+                            <div class="need-item">Wheelchair-accessible vans ($40k gap)</div>
+                            <div class="need-item">Volunteers for meal delivery (critical hours)</div>
+                            <div class="need-item">Mental health counselor (1-month funding shortfall)</div>
+                        </div>
+
+                        <div class="radar-insight" style="margin-top: 1rem; padding: 1rem;">
+                            <div class="radar-label">This Org in Radar</div>
+                            <strong>Capacity: 94% full</strong><br>
+                            <span style="color: var(--text-secondary); font-size: 0.9rem;">Population demand rising 8% YoY. This org is hitting a ceiling—high-impact help points here.</span>
+                        </div>
+
+                        <div class="cta-group">
+                            <button class="btn btn-primary">Donate</button>
+                            <button class="btn btn-secondary">Volunteer</button>
+                        </div>
+                        <button class="btn" style="width: 100%; margin-top: 0.75rem; background: var(--accent-soft); color: var(--accent-primary); border: 1px solid var(--border);">→ Impact Portal</button>
+                    </div>
+
+                    <!-- Nonprofit 2 -->
+                    <div class="nonprofit-card">
+                        <div class="nonprofit-header">
+                            <div class="nonprofit-name">North District Family Services</div>
+                            <p style="font-size: 0.8rem; color: var(--text-tertiary);">Serves North District • 3,800 families annually</p>
+                        </div>
+
+                        <div class="nonprofit-mission">
+                            "We reduce barriers to opportunity for low-income families. School support, job training, emergency assistance, and community organizing."
+                        </div>
+
+                        <div class="needs-list">
+                            <h4>Unmet needs (right now)</h4>
+                            <div class="need-item">Back-to-school supplies for 350 students ($8k)</div>
+                            <div class="need-item">Childcare during job training (15 families waiting)</div>
+                            <div class="need-item">Laptop/tablet donations for remote learning</div>
+                            <div class="need-item">Transportation vouchers (families can't reach services)</div>
+                        </div>
+
+                        <div class="radar-insight" style="margin-top: 1rem; padding: 1rem;">
+                            <div class="radar-label">This Org in Radar</div>
+                            <strong>Demand window: 2 weeks</strong><br>
+                            <span style="color: var(--text-secondary); font-size: 0.9rem;">Back-to-school surge incoming. Quick donations/supplies here have outsized impact.</span>
+                        </div>
+
+                        <div class="cta-group">
+                            <button class="btn btn-primary">Donate</button>
+                            <button class="btn btn-secondary">Volunteer</button>
+                        </div>
+                        <button class="btn" style="width: 100%; margin-top: 0.75rem; background: var(--accent-soft); color: var(--accent-primary); border: 1px solid var(--border);">→ Impact Portal</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Education -->
+            <div style="background: var(--accent-soft); border-radius: 8px; padding: 2rem; margin-top: 3rem; border-left: 4px solid var(--accent-primary);">
+                <h3 style="color: var(--accent-primary); margin-bottom: 0.75rem;">Why we show you the gaps</h3>
+                <p style="color: var(--text-secondary); line-height: 1.7;">Nonprofits rarely advertise unmet needs—it feels risky. But when donors and volunteers see the real gaps, matching becomes precise. Your help lands where it matters most, and nonprofits can plan better.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 4: Impact Dashboard -->
+    <div class="screen" id="screen-dashboard">
+        <div class="header">
+            <div class="logo">Buy Nothing</div>
+            <ul class="nav">
+                <li class="nav-item" onclick="showScreen('screen-browse')">Browse</li>
+                <li class="nav-item" onclick="showScreen('screen-context')">Impact</li>
+                <li class="nav-item" onclick="showScreen('screen-nonprofit')">Find Help</li>
+                <li class="nav-item active" onclick="showScreen('screen-dashboard')">Dashboard</li>
+                <li class="nav-item" onclick="showScreen('screen-flows')">Flows</li>
+            </ul>
+        </div>
+
+        <div class="container">
+            <h1>Resources rebalanced this month</h1>
+            <p class="intro">What moved. Who benefited. Where fairness happened.</p>
+
+            <!-- Key metrics row -->
+            <div class="metrics-grid" style="grid-template-columns: repeat(4, 1fr); margin: 2rem 0;">
+                <div class="metric-cell">
+                    <div class="metric-value">847</div>
+                    <div class="metric-label">Beds rebalanced across 12 orgs</div>
+                </div>
+                <div class="metric-cell warm">
+                    <div class="metric-value">$2.3M</div>
+                    <div class="metric-label">In supplies, equipment, funding redirected</div>
+                </div>
+                <div class="metric-cell">
+                    <div class="metric-value">5,420</div>
+                    <div class="metric-label">People served through rebalancing</div>
+                </div>
+                <div class="metric-cell warm">
+                    <div class="metric-value">34</div>
+                    <div class="metric-label">Waitlists shortened</div>
+                </div>
+            </div>
+
+            <!-- By subgroup -->
+            <div class="section">
+                <h2>Impact by population served</h2>
+                <div class="grid-3">
+                    <div class="card">
+                        <h3 style="color: var(--accent-primary);">Age 55+</h3>
+                        <div style="margin-top: 1rem;">
+                            <div style="font-size: 2rem; font-weight: 700; color: var(--accent-primary); margin-bottom: 0.5rem;">1,240 seniors</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">Placed in long-term care within 2 weeks (vs. 8-week average). Avg wait reduction: <strong>6 weeks</strong>.</div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3 style="color: var(--accent-primary);">Families with children</h3>
+                        <div style="margin-top: 1rem;">
+                            <div style="font-size: 2rem; font-weight: 700; color: var(--accent-primary); margin-bottom: 0.5rem;">2,800 people</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">Reached with school supplies, childcare, job training. <strong>350 students</strong> equipped for school before Sept 1.</div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3 style="color: var(--accent-primary);">Unhoused individuals</h3>
+                        <div style="margin-top: 1rem;">
+                            <div style="font-size: 2rem; font-weight: 700; color: var(--accent-primary); margin-bottom: 0.5rem;">1,380 people</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">Moved into transitional housing faster. <strong>92 people</strong> into permanent housing (vs. 23 projected).</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Geographic heatmap -->
+            <div class="section">
+                <h2>Where rebalancing is happening most</h2>
+                <div class="card" style="padding: 3rem; text-align: center; background: var(--bg-tertiary); border: 2px dashed var(--border); min-height: 350px; display: flex; flex-direction: column; justify-content: center;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🗺</div>
+                    <h3>Geographic Heatmap</h3>
+                    <p style="color: var(--text-tertiary); margin-top: 0.5rem; font-size: 0.9rem;">Shows density of trades by district. Highest impact zones highlighted. Click for district breakdown.</p>
+                    <div style="margin-top: 1.5rem; font-size: 0.8rem; color: var(--text-secondary);">
+                        <div style="margin: 0.5rem 0;"><span style="display: inline-block; width: 12px; height: 12px; background: #c97033; margin-right: 0.5rem; border-radius: 2px;"></span>High activity (50+ beds/trades)</div>
+                        <div style="margin: 0.5rem 0;"><span style="display: inline-block; width: 12px; height: 12px; background: #2d5f3f; margin-right: 0.5rem; border-radius: 2px;"></span>Medium activity (20-49 beds/trades)</div>
+                        <div style="margin: 0.5rem 0;"><span style="display: inline-block; width: 12px; height: 12px; background: #e0d5c7; margin-right: 0.5rem; border-radius: 2px;"></span>Emerging activity (1-19 beds/trades)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline of trades -->
+            <div class="section">
+                <h2>This month's trades (timeline)</h2>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-date">Aug 1</div>
+                        <div class="timeline-content">
+                            <strong>Grace Hospital → 4 Partner Sites</strong>
+                            <p style="margin-top: 0.5rem; font-size: 0.9rem;">100 long-term care beds, $150k in equipment</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">Aug 8</div>
+                        <div class="timeline-content">
+                            <strong>North District Family Services → 3 School Districts</strong>
+                            <p style="margin-top: 0.5rem; font-size: 0.9rem;">$120k school supplies, learning materials</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">Aug 12</div>
+                        <div class="timeline-content">
+                            <strong>Metro Homeless Coalition → 2 Transitional Housing Sites</strong>
+                            <p style="margin-top: 0.5rem; font-size: 0.9rem;">450 beds, furnishings, $200k case management funding</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">Aug 18</div>
+                        <div class="timeline-content">
+                            <strong>Eastside Senior Collective → Community Care Center</strong>
+                            <p style="margin-top: 0.5rem; font-size: 0.9rem;">50 day program beds, nutrition program ($30k)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Call to action -->
+            <div style="background: var(--accent-primary); color: white; border-radius: 8px; padding: 2rem; margin-top: 3rem; text-align: center;">
+                <h2 style="color: white; margin-bottom: 1rem;">Your help accelerates this</h2>
+                <p style="color: rgba(255, 255, 255, 0.9); margin-bottom: 1.5rem;">Every donation, every volunteer shift, every client referral strengthens the network. Communities heal faster when resources flow where they're needed most.</p>
+                <button class="btn btn-primary" style="background: white; color: var(--accent-primary); font-weight: 700;">Find ways to help</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 5: Interaction Flows Diagram -->
+    <div class="screen" id="screen-flows">
+        <div class="header">
+            <div class="logo">Buy Nothing</div>
+            <ul class="nav">
+                <li class="nav-item" onclick="showScreen('screen-browse')">Browse</li>
+                <li class="nav-item" onclick="showScreen('screen-context')">Impact</li>
+                <li class="nav-item" onclick="showScreen('screen-nonprofit')">Find Help</li>
+                <li class="nav-item" onclick="showScreen('screen-dashboard')">Dashboard</li>
+                <li class="nav-item active" onclick="showScreen('screen-flows')">Flows</li>
+            </ul>
+        </div>
+
+        <div class="container">
+            <h1>Interaction flows & user journeys</h1>
+            <p class="intro">How community members, donors, and volunteers move through the discovery interface.</p>
+
+            <!-- Flow 1 -->
+            <div class="section">
+                <h2>Flow 1: Community Member Discovers & Acts</h2>
+                <div class="diagram-section">
+                    <svg viewBox="0 0 1000 300" role="img" aria-label="Community member flow from browse through impact">
+                        <!-- Boxes -->
+                        <rect x="20" y="80" width="140" height="80" fill="var(--bg-tertiary)" stroke="currentColor" stroke-width="2" rx="4"/>
+                        <text x="90" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Browse</text>
+                        <text x="90" y="135" text-anchor="middle" font-size="12" fill="currentColor" opacity="0.7">Map view</text>
+                        <text x="90" y="150" text-anchor="middle" font-size="12" fill="currentColor" opacity="0.7">Filter by pop.</text>
+
+                        <rect x="200" y="80" width="140" height="80" fill="var(--bg-tertiary)" stroke="currentColor" stroke-width="2" rx="4"/>
+                        <text x="270" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">View Trade</text>
+                        <text x="270" y="135" text-anchor="middle" font-size="12" fill="currentColor" opacity="0.7">Radar insight</text>
+                        <text x="270" y="150" text-anchor="middle" font-size="12" fill="currentColor" opacity="0.7">Impact shown</text>
+
+                        <rect x="380" y="80" width="140" height="80" fill="var(--bg-tertiary)" stroke="currentColor" stroke-width="2" rx="4"/>
+                        <text x="450" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Find Nonprofit</text>
+                        <text x="450" y="135" text-anchor="middle" font-size="12" fill="currentColor" opacity="0.7">See unmet needs</text>
+                        <text x="450" y="150" text-anchor="middle" font-size="12" fill="currentColor" opacity="0.7">Capacity status</text>
+
+                        <rect x="560" y="80" width="140" height="80" fill="var(--bg-tertiary)" stroke="currentColor" stroke-width="2" rx="4"/>
+                        <text x="630" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Choose Action</text>
+                        <text x="630" y="135" text-anchor="middle" font-size="12" fill="currentColor" opacity="0.7">Donate</text>
+                        <text x="630" y="150" text-anchor="middle" font-size="12" fill="currentColor" opacity="0.7">Volunteer</text>
+
+                        <rect x="740" y="80" width="140" height="80" fill="var(--bg-tertiary)" stroke="currentColor" stroke-width="2" rx="4"/>
+                        <text x="810" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Impact Portal</text>
+                        <text x="810" y="135" text-anchor="middle" font-size="12" fill="currentColor" opacity="0.7">Direct engagement</text>
+                        <text x="810" y="150" text-anchor="middle" font-size="12" fill="currentColor" opacity="0.7">Track impact</text>
+
+                        <!-- Arrows -->
+                        <line x1="160" y1="120" x2="200" y2="120" stroke="currentColor" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        <line x1="340" y1="120" x2="380" y2="120" stroke="currentColor" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        <line x1="520" y1="120" x2="560" y2="120" stroke="currentColor" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        <line x1="700" y1="120" x2="740" y2="120" stroke="currentColor" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                        <!-- Decision point -->
+                        <circle cx="630" cy="220" r="6" fill="var(--accent-warm)" stroke="currentColor" stroke-width="1"/>
+                        <text x="630" y="255" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.7">Community member helps</text>
+                        <text x="630" y="268" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.7">$, time, or referral</text>
+
+                        <!-- Arrow marker definition -->
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                <polygon points="0 0, 10 3, 0 6" fill="currentColor"/>
+                            </marker>
+                        </defs>
+                    </svg>
+                    <p class="flow-label" style="margin-top: 1rem; text-align: center;">Discovery → Context → Match → Action → Impact Portal</p>
+                </div>
+                <p style="color: var(--text-secondary); margin-top: 1rem;">Entry point: Browse happening trades. User clicks a trade, sees the Radar insight (why it matters), then discovers the nonprofit's unmet needs. From there, they choose a specific way to help and move to the Impact Portal for direct engagement.</p>
+            </div>
+
+            <!-- Flow 2 -->
+            <div class="section">
+                <h2>Flow 2: Donor Researches & Maximizes Impact</h2>
+                <div class="diagram-section">
+                    <svg viewBox="0 0 1000 280" role="img" aria-label="Donor flow emphasizing impact research">
+                        <!-- Boxes -->
+                        <rect x="20" y="60" width="130" height="80" fill="var(--bg-tertiary)" stroke="currentColor" stroke-width="2" rx="4"/>
+                        <text x="85" y="95" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Impact</text>
+                        <text x="85" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Dashboard</text>
+                        <text x="85" y="135" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.7">See rebalancing</text>
+
+                        <rect x="180" y="60" width="130" height="80" fill="var(--bg-tertiary)" stroke="currentColor" stroke-width="2" rx="4"/>
+                        <text x="245" y="95" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Filter by</text>
+                        <text x="245" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Subgroup</text>
+                        <text x="245" y="135" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.7">"Age 55+"</text>
+
+                        <rect x="340" y="60" width="130" height="80" fill="var(--bg-tertiary)" stroke="currentColor" stroke-width="2" rx="4"/>
+                        <text x="405" y="95" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Find Nonprofit</text>
+                        <text x="405" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">in That Area</text>
+                        <text x="405" y="135" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.7">See gaps</text>
+
+                        <rect x="500" y="60" width="130" height="80" fill="var(--bg-tertiary)" stroke="currentColor" stroke-width="2" rx="4"/>
+                        <text x="565" y="95" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">See Radar</text>
+                        <text x="565" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Context</text>
+                        <text x="565" y="135" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.7">Why urgent</text>
+
+                        <rect x="660" y="60" width="130" height="80" fill="var(--accent-soft)" stroke="var(--accent-primary)" stroke-width="2" rx="4"/>
+                        <text x="725" y="95" text-anchor="middle" font-size="13" font-weight="600" fill="var(--accent-primary)">Donate</text>
+                        <text x="725" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="var(--accent-primary)">Targeted</text>
+                        <text x="725" y="135" text-anchor="middle" font-size="11" fill="var(--accent-primary)" opacity="0.9">High impact</text>
+
+                        <rect x="820" y="60" width="130" height="80" fill="var(--bg-tertiary)" stroke="currentColor" stroke-width="2" rx="4"/>
+                        <text x="885" y="95" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Track</text>
+                        <text x="885" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Impact</text>
+                        <text x="885" y="135" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.7">See results</text>
+
+                        <!-- Arrows -->
+                        <line x1="150" y1="100" x2="180" y2="100" stroke="currentColor" stroke-width="2" marker-end="url(#arrowhead2)"/>
+                        <line x1="310" y1="100" x2="340" y2="100" stroke="currentColor" stroke-width="2" marker-end="url(#arrowhead2)"/>
+                        <line x1="470" y1="100" x2="500" y2="100" stroke="currentColor" stroke-width="2" marker-end="url(#arrowhead2)"/>
+                        <line x1="630" y1="100" x2="660" y2="100" stroke="currentColor" stroke-width="2" marker-end="url(#arrowhead3)"/>
+                        <line x1="790" y1="100" x2="820" y2="100" stroke="currentColor" stroke-width="2" marker-end="url(#arrowhead2)"/>
+
+                        <!-- Research loop (bottom) -->
+                        <path d="M 245 140 Q 245 200, 405 200 Q 565 200, 245 220" stroke="currentColor" stroke-width="1" stroke-dasharray="4" fill="none" marker-end="url(#arrowhead2)"/>
+                        <text x="405" y="230" text-anchor="middle" font-size="10" fill="currentColor" opacity="0.7">Can loop back to compare</text>
+
+                        <defs>
+                            <marker id="arrowhead2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                <polygon points="0 0, 10 3, 0 6" fill="currentColor"/>
+                            </marker>
+                            <marker id="arrowhead3" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                <polygon points="0 0, 10 3, 0 6" fill="var(--accent-primary)"/>
+                            </marker>
+                        </defs>
+                    </svg>
+                    <p class="flow-label" style="margin-top: 1rem; text-align: center;">Research-heavy path: Dashboard → Segment → Find Nonprofit → Understand Why → Donate → Track</p>
+                </div>
+                <p style="color: var(--text-secondary); margin-top: 1rem;">Donor wants to maximize impact. They start at the Impact Dashboard, filter by population (e.g., "Age 55+"), find nonprofits in that area, see the Radar insights explaining why help is urgent, and donate. Results are tracked in the Impact Portal.</p>
+            </div>
+
+            <!-- Flow 3 -->
+            <div class="section">
+                <h2>Flow 3: Volunteer Sees Urgent Need & Acts</h2>
+                <div class="diagram-section">
+                    <svg viewBox="0 0 1000 240" role="img" aria-label="Volunteer fast path from browse to action">
+                        <!-- Entry -->
+                        <rect x="20" y="60" width="140" height="70" fill="var(--bg-tertiary)" stroke="currentColor" stroke-width="2" rx="4"/>
+                        <text x="90" y="95" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Browse</text>
+                        <text x="90" y="115" text-anchor="middle" font-size="12" fill="currentColor" opacity="0.7">Lives near</text>
+                        <text x="90" y="130" text-anchor="middle" font-size="12" fill="currentColor" opacity="0.7">trade zone</text>
+
+                        <!-- Click trade -->
+                        <rect x="190" y="60" width="140" height="70" fill="var(--bg-tertiary)" stroke="currentColor" stroke-width="2" rx="4"/>
+                        <text x="260" y="95" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">See Trade +</text>
+                        <text x="260" y="115" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Radar</text>
+                        <text x="260" y="130" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.7">Why urgent</text>
+
+                        <!-- See unmet needs -->
+                        <rect x="360" y="60" width="140" height="70" fill="var(--bg-tertiary)" stroke="currentColor" stroke-width="2" rx="4"/>
+                        <text x="430" y="95" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">See Nonprofit</text>
+                        <text x="430" y="115" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Unmet Needs</text>
+                        <text x="430" y="130" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.7">"Volunteers needed"</text>
+
+                        <!-- Volunteer CTA -->
+                        <rect x="530" y="60" width="140" height="70" fill="var(--accent-soft)" stroke="var(--accent-primary)" stroke-width="2" rx="4"/>
+                        <text x="600" y="95" text-anchor="middle" font-size="12" font-weight="600" fill="var(--accent-primary)">Click</text>
+                        <text x="600" y="115" text-anchor="middle" font-size="12" font-weight="600" fill="var(--accent-primary)">Volunteer</text>
+                        <text x="600" y="130" text-anchor="middle" font-size="11" fill="var(--accent-primary)" opacity="0.9">→ Portal</text>
+
+                        <!-- Action -->
+                        <rect x="700" y="60" width="140" height="70" fill="var(--bg-tertiary)" stroke="currentColor" stroke-width="2" rx="4"/>
+                        <text x="770" y="95" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Sign Up</text>
+                        <text x="770" y="115" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Specific Shift</text>
+                        <text x="770" y="130" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.7">Start helping</text>
+
+                        <!-- Arrows -->
+                        <line x1="160" y1="95" x2="190" y2="95" stroke="currentColor" stroke-width="2" marker-end="url(#arrowhead4)"/>
+                        <line x1="330" y1="95" x2="360" y2="95" stroke="currentColor" stroke-width="2" marker-end="url(#arrowhead4)"/>
+                        <line x1="500" y1="95" x2="530" y2="95" stroke="currentColor" stroke-width="2" marker-end="url(#arrowhead5)"/>
+                        <line x1="670" y1="95" x2="700" y2="95" stroke="currentColor" stroke-width="2" marker-end="url(#arrowhead4)"/>
+
+                        <!-- Time note -->
+                        <text x="500" y="190" text-anchor="middle" font-size="10" fill="currentColor" opacity="0.6">Fast path: ~2 min from discover to action</text>
+
+                        <defs>
+                            <marker id="arrowhead4" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                <polygon points="0 0, 10 3, 0 6" fill="currentColor"/>
+                            </marker>
+                            <marker id="arrowhead5" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                <polygon points="0 0, 10 3, 0 6" fill="var(--accent-primary)"/>
+                            </marker>
+                        </defs>
+                    </svg>
+                    <p class="flow-label" style="margin-top: 1rem; text-align: center;">Fast path for urgent action: Browse → Trade → Org → Volunteer → Portal</p>
+                </div>
+                <p style="color: var(--text-secondary); margin-top: 1rem;">Volunteers see an urgent need nearby and want to act fast. The path is streamlined: browse, see why it matters (Radar), find the specific need (meal delivery, transportation), and sign up. No friction.</p>
+            </div>
+
+            <!-- Key interaction principles -->
+            <div class="section" style="margin-top: 3rem;">
+                <h2>Interaction principles across all flows</h2>
+                <div class="grid-2">
+                    <div class="card">
+                        <h3 style="color: var(--accent-primary); margin-bottom: 1rem;">1. Context before action</h3>
+                        <p>Every action (donate, volunteer, refer) is preceded by understanding why it matters. Radar insights are never hidden behind navigation.</p>
+                    </div>
+                    <div class="card">
+                        <h3 style="color: var(--accent-primary); margin-bottom: 1rem;">2. Real data grounds decisions</h3>
+                        <p>Nonprofits list actual unmet needs, not aspirations. Users see capacity %, waitlist length, and population demand shifts. No guesswork.</p>
+                    </div>
+                    <div class="card">
+                        <h3 style="color: var(--accent-primary); margin-bottom: 1rem;">3. Multiple entry points</h3>
+                        <p>Browse map, search nonprofit, view dashboard, filter by population—each starting point leads to the same core insights and actions.</p>
+                    </div>
+                    <div class="card">
+                        <h3 style="color: var(--accent-primary); margin-bottom: 1rem;">4. Impact Portal is the doorway</h3>
+                        <p>Discovery ends in the Impact Portal. That's where direct engagement, tracking, and long-term relationship building happen.</p>
+                    </div>
+                    <div class="card">
+                        <h3 style="color: var(--accent-primary); margin-bottom: 1rem;">5. Loop back to explore</h3>
+                        <p>Users can compare nonprofits, explore alternative trades, see different subgroups—the system supports research before commitment.</p>
+                    </div>
+                    <div class="card">
+                        <h3 style="color: var(--accent-primary); margin-bottom: 1rem;">6. Fair prominence to education</h3>
+                        <p>"Why fairness matters" and "How Buy Nothing works" are woven throughout, not buried in an FAQ. Stories build trust.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timeline view screen -->
+    <div class="screen" id="screen-timeline">
+        <div class="header">
+            <div class="logo">Buy Nothing</div>
+            <ul class="nav">
+                <li class="nav-item active" onclick="showScreen('screen-browse')">Browse</li>
+                <li class="nav-item" onclick="showScreen('screen-context')">Impact</li>
+                <li class="nav-item" onclick="showScreen('screen-nonprofit')">Find Help</li>
+                <li class="nav-item" onclick="showScreen('screen-dashboard')">Dashboard</li>
+                <li class="nav-item" onclick="showScreen('screen-flows')">Flows</li>
+            </ul>
+        </div>
+
+        <div class="container">
+            <h1>This week's rebalanced resources</h1>
+            <p class="intro">Chronological view of resource flows—see what moved, when, and to whom.</p>
+
+            <div class="controls">
+                <div class="filter-group">
+                    <span style="font-size: 0.85rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin: auto 0;">Filter by population:</span>
+                    <span class="filter-pill active">All</span>
+                    <span class="filter-pill">Age 55+</span>
+                    <span class="filter-pill">Families</span>
+                    <span class="filter-pill">Unhoused</span>
+                </div>
+                <div class="view-toggle">
+                    <button class="view-btn" onclick="showScreen('screen-browse')">Map</button>
+                    <button class="view-btn active">Timeline</button>
+                </div>
+            </div>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">Monday, Aug 18</div>
+                    <div class="timeline-content">
+                        <strong>50 Day Program Beds → Eastside Senior Collective</strong>
+                        <p style="margin-top: 0.75rem; font-size: 0.9rem; color: var(--text-secondary);">From: Grace Hospital Continuing Care</p>
+                        <div class="radar-insight" style="margin-top: 0.75rem; padding: 1rem;">
+                            <div class="radar-label">Radar: Capacity spike</div>
+                            <strong>Age 55+ population +8% this quarter</strong><br>
+                            <span style="font-size: 0.85rem;">Eastside at 94% full. This trade opens 50 new slots for waitlisted seniors.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-date">Wednesday, Aug 13</div>
+                    <div class="timeline-content">
+                        <strong>$120k School Supplies + Learning Materials</strong>
+                        <p style="margin-top: 0.75rem; font-size: 0.9rem; color: var(--text-secondary);">From: North District Family Services → 3 School Districts</p>
+                        <div class="radar-insight" style="margin-top: 0.75rem; padding: 1rem;">
+                            <div class="radar-label">Radar: Seasonal demand</div>
+                            <strong>Back-to-school surge in 2 weeks</strong><br>
+                            <span style="font-size: 0.85rem;">Supplies reaching 350 low-income students before Sept 1 school start.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-date">Sunday, Aug 1</div>
+                    <div class="timeline-content">
+                        <strong>100 Long-term Care Beds → 4 Partner Sites</strong>
+                        <p style="margin-top: 0.75rem; font-size: 0.9rem; color: var(--text-secondary);">From: Grace Hospital Continuing Care + $150k equipment</p>
+                        <div class="radar-insight" style="margin-top: 0.75rem; padding: 1rem;">
+                            <div class="radar-label">Radar: Population shift</div>
+                            <strong>Age 65+ demand +12% YoY</strong><br>
+                            <span style="font-size: 0.85rem;">Grace has supply; 4 partners have demand. Trade cuts waitlist times from 8 weeks to 2 weeks.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showScreen(screenId) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Show selected screen
+            document.getElementById(screenId).classList.add('active');
+
+            // Add active class to clicked nav item
+            event.target.classList.add('active');
+
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+    </script>
+</body>
+</html>

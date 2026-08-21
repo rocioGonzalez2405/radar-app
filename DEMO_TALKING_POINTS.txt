@@ -1,0 +1,131 @@
+═══════════════════════════════════════════════════════════════════════════
+RADAR — DEMO DAY TALKING POINTS
+═══════════════════════════════════════════════════════════════════════════
+
+THE ELEVATOR PITCH (30 seconds)
+───────────────────────────────────────────────────────────────────────────
+Radar is a decision-support dashboard for San Diego's homelessness response
+system. It shows real, sourced trends — not invented numbers. The key insight:
+homelessness is down 64% downtown, but one group is moving the opposite
+direction: adults 55+, now 33% of unsheltered and rising. A simple dashboard
+hides that. Radar doesn't. It shows exactly who needs help, and connects
+organizations to fund that gap directly.
+
+
+THE FIVE-MINUTE PITCH (with demo flow)
+───────────────────────────────────────────────────────────────────────────
+
+1. START HERE: Forecast page
+   - Show the counter-intuitive data: "Downtown is down 64%"
+   - Show the caveat: "But that improvement is slowing"
+   - Emphasize: "Every number has a source and a date. See below."
+
+2. THEN: Capacity page
+   - Click on the Age 55+ bar
+   - Say: "This is the warning sign. Only subgroup getting worse.
+             All others improving 22–72%."
+   - Show the investments: "This is how the response is scaling."
+
+3. THEN: Sources page
+   - Say: "Every metric in the app traces back to one of these 11
+            public sources. Not invented. Real."
+   - Point to a source: "Want to verify? Here's the link."
+
+4. CLOSING: Impact Portal
+   - Say: "Next step: wire this data to organizations. When you see
+          Age 55+ is rising, you see orgs serving seniors and can fund
+          them directly."
+
+
+KEY NUMBERS TO QUOTE (memorize these)
+───────────────────────────────────────────────────────────────────────────
+  64%    — Downtown unsheltered decline (2,104 → 756)
+  7% → 1% — YoY improvement slowing down hard
+  33% vs 29% — Age 55+ share rising (only rising subgroup)
+  $2,606/mo — Average rent (up 22% in 5 years)
+  79%    — Extremely-low-income households severely rent-burdened
+  $220.6M — Regional HHAP funding (2019–2025)
+  5,684  — People housed from that funding
+  11     — Public sources; 0 made-up numbers
+
+
+ANTICIPATED QUESTIONS & ANSWERS
+───────────────────────────────────────────────────────────────────────────
+
+Q: "Is this live data?"
+A: The frontend and data model are fully built. The backend is architected
+   and ready. See the Sources page — we pull from 11 public datasets.
+
+Q: "Why don't you show domestic violence shelter occupancy?"
+A: Great question. We started with it, then realized there's no public data
+   for San Diego at that granularity. Survivor privacy is protected by design.
+   So we removed it rather than invent. That's the integrity of the app —
+   it's smaller than it could be, and everything shown is real.
+
+Q: "How did you choose these subgroups?"
+A: From RTFH's Point-in-Time Count, which they publish annually. This is how
+   the regional homelessness authority segments the population.
+
+Q: "What about veterans/families/youth?"
+A: All trending down (25%, 72%, 22% respectively). Age 55+ is the anomaly.
+   That's why Radar surfaces it — most dashboards wouldn't.
+
+Q: "Can I drill down to a neighborhood?"
+A: For downtown, yes — we have monthly granularity from the Downtown
+   Partnership. For the county, the data doesn't exist at that level yet.
+   See the Sources page.
+
+Q: "What about chronic homelessness?"
+A: RTFH tracks it, but it's not in this version. We chose to focus on trend
+   and subgroup because those are the highest-impact signals for allocation.
+
+Q: "Can this run in a different city?"
+A: The architecture would. Data sources would change. The methodology (linking
+   trends to services) is portable.
+
+Q: "What's the Impact Portal?"
+A: We built it to show how organizations can publish projects — money,
+   volunteering, skills. Next phase wires it to the data: "Age 55+ is rising,
+   here are orgs serving them, fund them directly."
+
+Q: "Who would use this?"
+A: CoC directors (where should I allocate?), funding agencies (which gaps are
+   real?), nonprofits (where do I fit in?), donors (what's working?).
+
+
+THE STRONGEST TALKING POINT (use this if you're running out of time)
+───────────────────────────────────────────────────────────────────────────
+"We built a first version with invented data — a synthetic what-if simulator,
+made-up demand gaps, predicted evictions. Then we deleted it all. Every number
+you see now has a named, dated public source. That's why the app is smaller
+than it could be, and why organizations can trust what's shown. That's the
+opposite of how most hackathon dashboards get built."
+
+
+RED FLAGS TO AVOID
+───────────────────────────────────────────────────────────────────────────
+❌ Don't say "we have all the data we need" — Phase 3 (service directory)
+   still needs 211 partnership
+❌ Don't claim the Triage cases are real — they're simulated, grounded in real
+   methodology (always say that)
+❌ Don't promise live HMIS data in the demo — it's not connected yet
+✓ DO say "designed and ready" for backend integration
+
+
+IF THEY ASK ABOUT COMPETITION / COMPARISON
+───────────────────────────────────────────────────────────────────────────
+"Most homelessness dashboards show aggregate counts. Radar is different:
+it breaks apart the aggregate, surfaces the subgroups moving the wrong way,
+and connects organizations to address them. The Age 55+ insight is real and
+is what you'd miss in a simpler dashboard."
+
+
+CLOSING PITCH
+───────────────────────────────────────────────────────────────────────────
+"Radar answers the question: where should the next dollar go? Not with
+guesses. With trends, with subgroup breakdowns, with organizations you can
+fund directly. The data is real. The architecture scales. And the core insight
+— that one subgroup is rising while everything else improves — is exactly the
+kind of actionable signal that decision-makers need."
+
+═══════════════════════════════════════════════════════════════════════════

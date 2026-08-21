@@ -1,0 +1,203 @@
+================================================================================
+RADAR APP — COMPLETE DOCUMENTATION INDEX
+August 21, 2026
+================================================================================
+
+This folder now contains 6 comprehensive verification and resource-matching
+documents, plus supporting materials. This index shows what each document
+contains and when to use it.
+
+================================================================================
+PRIMARY DOCUMENTS (for demo day & judges)
+================================================================================
+
+1. README_VERIFICATION.md [📄 MASTER INDEX]
+   ├─ Purpose: Navigate all verification & resource-matching docs
+   ├─ Content: Quick starts (5min, 20min, 1hr), success checklist, FAQ
+   ├─ Use: FIRST — contains pointers to everything else
+   └─ Time to read: 5 minutes
+
+2. VERIFICATION_SUMMARY.md [📋 QUICK REFERENCE]
+   ├─ Purpose: Prove the app is real and ready
+   ├─ Content: All 5 pages verified, data integrity proof, source checklist
+   ├─ Use: For judges who want proof; for your preparation
+   ├─ Key sections: Section 3 (data proof), Section 6 (talking points)
+   └─ Time to read: 15 minutes
+
+3. DEMO_TALKING_POINTS.txt [🎤 SCRIPT]
+   ├─ Purpose: Memorizable scripts for demo and Q&A
+   ├─ Content: 30-sec elevator pitch, 5-min flow, 8 key numbers, 12 Q&As
+   ├─ Use: PRINT THIS. Read once, memorize, reference during demo
+   ├─ Critical sections: "Anticipated Questions", "Strongest Talking Point"
+   └─ Time to memorize: 20-30 minutes
+
+4. ASSESSMENT.md [🔬 DEEP DIVE VERIFICATION]
+   ├─ Purpose: Detailed verification of every claim
+   ├─ Content: 5 pages examined line-by-line, all 13 sources listed & verified
+   ├─ Use: For judges who drill deep; for your detailed Q&A prep
+   ├─ Key sections: Section 1 (pages), Section 2 (sources), Section 5 (removed data)
+   ├─ Screenshots included
+   └─ Time to read: 30 minutes (or skim sections as needed)
+
+================================================================================
+IMPLEMENTATION DOCUMENTS (for building next phase)
+================================================================================
+
+5. RESOURCE_MATCHING_ROADMAP.md [🛣️ IMPLEMENTATION GUIDE]
+   ├─ Purpose: Blueprint for wiring Portal to Radar data
+   ├─ Content: 4-phase plan, code examples (TypeScript), UI mockups
+   ├─ Phases:
+   │  ├─ Phase 1: Portal metadata (1-2 weeks) — highest ROI, do this first
+   │  ├─ Phase 2: Triage routing (2-3 weeks)
+   │  ├─ Phase 3: Service directory (4-6 weeks, needs 211 partnership)
+   │  └─ Phase 4: Funding recommendations (ongoing)
+   ├─ Use: If advancing past competition; for showing "what's next"
+   ├─ Key sections: Phase 1 (copy-paste ready), Algorithm section, Success metrics
+   └─ Time to read: 30 minutes (skim) or 1 hour (full)
+
+6. DATA_SOURCES_REFERENCE.md [📚 AUDIT TRAIL]
+   ├─ Purpose: Verify data independently; maintain currency
+   ├─ Content: Quick lookup table, full source list with verification steps
+   ├─ Use: Monthly data refresh, judge verification, "prove it" challenges
+   ├─ Key sections: "Quick Lookup by Metric", "Full Source List", "Verification Checklist"
+   ├─ Includes: How to find each source online, what to check monthly, what to do if data changes
+   └─ Time to use: 5 minutes (lookup), 30 minutes (full audit)
+
+================================================================================
+ORIGINAL DOCUMENTATION
+================================================================================
+
+7. README.md [📖 PROJECT SETUP]
+   ├─ Purpose: How to run the app
+   ├─ Content: Dependencies, quick start, commands, tech stack, project layout
+   ├─ Use: For local development; for judges running it themselves
+   └─ Time to use: 2 minutes (if running locally)
+
+8. ASSESSMENT.md [also contains]:
+   ├─ Multiple screenshots of running app
+   └─ Evidence of all pages working
+
+================================================================================
+CONTEXT MEMORY (for continuity)
+================================================================================
+
+9. memory/radar-app-overview.md [internal]
+   ├─ Session memory: What Radar is, structure, resource matching gap
+   └─ Use: Internal Claude context (not for judges)
+
+================================================================================
+QUICK DECISION TREE: "Which document should I read?"
+================================================================================
+
+Q: "I have 5 minutes. What do I read?"
+A: DEMO_TALKING_POINTS.txt (30-sec pitch + key numbers)
+
+Q: "I'm a judge. Are the numbers real?"
+A: VERIFICATION_SUMMARY.md (section 2) + check one source in DATA_SOURCES_REFERENCE.md
+
+Q: "I need to prepare for Q&A"
+A: ASSESSMENT.md (section 8) + DEMO_TALKING_POINTS.txt
+
+Q: "What's the resource/service matching plan?"
+A: RESOURCE_MATCHING_ROADMAP.md (intro + Phase 1)
+
+Q: "I'm building this next. Where do I start?"
+A: README_VERIFICATION.md (for context) + RESOURCE_MATCHING_ROADMAP.md (for implementation)
+
+Q: "How do I know this data is current?"
+A: DATA_SOURCES_REFERENCE.md (verification checklist)
+
+Q: "I need to verify a specific metric"
+A: DATA_SOURCES_REFERENCE.md (quick lookup table)
+
+================================================================================
+FILE CHECKLIST: All Documents Present?
+================================================================================
+
+✅ README_VERIFICATION.md           (master index)
+✅ VERIFICATION_SUMMARY.md          (quick reference)
+✅ DEMO_TALKING_POINTS.txt          (script)
+✅ ASSESSMENT.md                    (deep dive)
+✅ RESOURCE_MATCHING_ROADMAP.md     (implementation)
+✅ DATA_SOURCES_REFERENCE.md        (audit trail)
+✅ README.md                        (original)
+✅ DOCUMENTATION_INDEX.txt          (this file)
+
+================================================================================
+NEXT STEPS FOR DEMO DAY
+================================================================================
+
+1. READ (15 min)
+   └─ VERIFICATION_SUMMARY.md → DEMO_TALKING_POINTS.txt
+
+2. MEMORIZE (20 min)
+   └─ 8 key numbers from DEMO_TALKING_POINTS.txt
+
+3. PRACTICE (15 min)
+   └─ Run app locally, walk through 5 pages, recite 5-min pitch
+
+4. VERIFY (10 min)
+   └─ Check one data source from DATA_SOURCES_REFERENCE.md online
+
+5. GO (ready in ~60 min)
+   └─ Demo ready; judges trust you
+
+================================================================================
+DOCUMENT SIZE & READ TIME
+================================================================================
+
+README_VERIFICATION.md              ~6 pages    ~10 min
+VERIFICATION_SUMMARY.md             ~7 pages    ~15 min
+DEMO_TALKING_POINTS.txt             ~3 pages    ~10 min (memorize: 20 min)
+ASSESSMENT.md                        ~15 pages   ~30 min (skim: 10 min)
+RESOURCE_MATCHING_ROADMAP.md        ~12 pages   ~30 min (skim: 10 min)
+DATA_SOURCES_REFERENCE.md           ~10 pages   ~20 min (lookup: 5 min)
+README.md                            ~2 pages    ~5 min
+───────────────────────────────────────────────────────────────────────
+TOTAL (comprehensive)                ~55 pages   ~2.5 hours
+TOTAL (demo prep only)               ~16 pages   ~45 minutes
+
+================================================================================
+KEY QUOTE TO REMEMBER
+================================================================================
+
+"We built a first version with invented data — a synthetic what-if simulator,
+made-up demand gaps, predicted evictions. Then we deleted it all. Every number
+you see now has a named, dated public source. That's why the app is smaller
+than it could be, and why organizations can trust what's shown. That's the
+opposite of how most hackathon dashboards get built."
+
+                        ↑ Use this if running short on time ↑
+
+================================================================================
+CONTACT / QUESTIONS
+================================================================================
+
+For questions on specific metrics:
+→ See DATA_SOURCES_REFERENCE.md (which source, how to verify)
+
+For questions on data integrity:
+→ See ASSESSMENT.md section 2 (all sources listed with verification steps)
+
+For questions on "what's next":
+→ See RESOURCE_MATCHING_ROADMAP.md (4-phase plan)
+
+For demo day prep:
+→ See DEMO_TALKING_POINTS.txt (Q&A section)
+
+For understanding the whole story:
+→ Start with README_VERIFICATION.md (master index)
+
+================================================================================
+FINAL STATUS
+================================================================================
+
+✅ App verified and running
+✅ All data sourced and current
+✅ Resource matching gap identified and roadmap created
+✅ Demo day materials prepared
+✅ Judge Q&A anticipated and answered
+
+Ready for submission.
+
+================================================================================

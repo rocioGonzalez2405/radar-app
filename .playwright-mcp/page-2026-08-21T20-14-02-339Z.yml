@@ -1,0 +1,85 @@
+- generic [active] [ref=f6e1]:
+  - generic [ref=f6e3]:
+    - banner [ref=f6e4]:
+      - generic [ref=f6e5]:
+        - link "R Radar Downtown · Women's Homelessness Console" [ref=f6e6] [cursor=pointer]:
+          - /url: /
+          - generic [ref=f6e7]: R
+          - generic [ref=f6e8]:
+            - generic [ref=f6e9]: Radar
+            - generic [ref=f6e10]: Downtown · Women's Homelessness Console
+        - navigation [ref=f6e11]:
+          - link "Triage" [ref=f6e12] [cursor=pointer]:
+            - /url: /
+          - link "Forecast" [ref=f6e13] [cursor=pointer]:
+            - /url: /forecast
+          - link "Capacity" [ref=f6e14] [cursor=pointer]:
+            - /url: /capacity
+          - link "Investment" [ref=f6e15] [cursor=pointer]:
+            - /url: /simulator
+          - link "Sources" [ref=f6e16] [cursor=pointer]:
+            - /url: /sources
+          - link "AffordAI" [ref=f6e17] [cursor=pointer]:
+            - /url: /affordai
+        - link "Start a project" [ref=f6e19] [cursor=pointer]:
+          - /url: /portal
+    - main [ref=f6e20]:
+      - generic [ref=f6e21]:
+        - generic [ref=f6e22]:
+          - generic [ref=f6e23]: Resource allocation
+          - heading "Which subgroups are trending up, and which are trending down" [level=1] [ref=f6e24]
+          - paragraph [ref=f6e25]: Year-over-year change by subgroup, from the RTFH Point-in-Time Count, plus real, dated capacity investments — not a modeled demand-vs-capacity gap, which has no public data source.
+        - generic [ref=f6e26]:
+          - generic [ref=f6e27]:
+            - generic [ref=f6e28]: Families
+            - generic [ref=f6e29]: "-72%"
+            - generic [ref=f6e30]: down vs 2024
+          - generic [ref=f6e31]:
+            - generic [ref=f6e32]: Veterans
+            - generic [ref=f6e33]: "-25%"
+            - generic [ref=f6e34]: down vs 2024
+          - generic [ref=f6e35]:
+            - generic [ref=f6e36]: Youth (18-24)
+            - generic [ref=f6e37]: "-22%"
+            - generic [ref=f6e38]: down vs 2024
+          - generic [ref=f6e39]:
+            - generic [ref=f6e40]: Age 55+
+            - generic [ref=f6e41]: +4%
+            - generic [ref=f6e42]: up vs 2024 — watch
+        - generic [ref=f6e43]:
+          - generic [ref=f6e44]:
+            - generic [ref=f6e45]: "% change vs. 2024, by subgroup"
+            - generic [ref=f6e46]: "Source: RTFH PIT Count 2025"
+          - generic [ref=f6e47]:
+            - generic [ref=f6e48]:
+              - generic [ref=f6e49]: Decreased
+              - generic [ref=f6e51]: Increased
+            - img [ref=f6e56]:
+              - generic [ref=f6e60]:
+                - generic [ref=f6e61]: "-75%"
+                - generic [ref=f6e63]: "-50%"
+                - generic [ref=f6e65]: "-25%"
+                - generic [ref=f6e67]: 0%
+                - generic [ref=f6e69]: 25%
+              - generic [ref=f6e72]:
+                - generic [ref=f6e73]: Families
+                - generic [ref=f6e75]: Veterans
+                - generic [ref=f6e77]: Youth (18-24)
+                - generic [ref=f6e79]: Age 55+
+            - paragraph [ref=f6e81]:
+              - generic [ref=f6e82]: "Families:"
+              - text: "RTFH PIT Count 2025: unsheltered families down 72% vs 2024."
+          - paragraph [ref=f6e83]: Reading it — every subgroup fell year-over-year except people age 55+, which rose and now makes up a growing share of the unsheltered population. RTFH flags this as the one warning sign in an otherwise improving count.
+        - generic [ref=f6e84]:
+          - generic [ref=f6e85]: Recent capacity investments
+          - generic [ref=f6e87]:
+            - generic [ref=f6e88]:
+              - generic [ref=f6e89]: +160 bedsRachel's Promise Center, women/families, winter 2025-26
+              - generic [ref=f6e90]: Inside San Diego, July 2025
+            - generic [ref=f6e91]:
+              - generic [ref=f6e92]: +190 spacesSafe Parking H Barracks site, May 2025
+              - generic [ref=f6e93]: City of San Diego official announcement, May 2025
+            - generic [ref=f6e94]:
+              - generic [ref=f6e95]: 360+ bedsCity-funded, last 2 years, across women, families, youth, seniors, veterans
+              - generic [ref=f6e96]: Inside San Diego, "Street Homelessness Down Two Years in a Row", 2026
+  - generic [ref=f6e97]: Families

@@ -1,0 +1,119 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "R Radar Downtown · Women's Homelessness Console" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e7]: R
+        - generic [ref=e8]:
+          - generic [ref=e9]: Radar
+          - generic [ref=e10]: Downtown · Women's Homelessness Console
+      - navigation [ref=e11]:
+        - link "Triage" [ref=e12] [cursor=pointer]:
+          - /url: /
+        - link "Forecast" [ref=e13] [cursor=pointer]:
+          - /url: /forecast
+        - link "Capacity" [ref=e14] [cursor=pointer]:
+          - /url: /capacity
+        - link "Investment" [ref=e15] [cursor=pointer]:
+          - /url: /simulator
+        - link "Sources" [ref=e16] [cursor=pointer]:
+          - /url: /sources
+        - link "AffordAI" [ref=e17] [cursor=pointer]:
+          - /url: /affordai
+      - link "Start a project" [ref=e19] [cursor=pointer]:
+        - /url: /portal
+  - main [ref=e20]:
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - generic [ref=e23]:
+          - generic [ref=e24]: Simulated — grounded in real study
+          - heading "Who needs help first, today" [level=1] [ref=e25]
+          - paragraph [ref=e26]: Case-level urgency scoring, ranked by how little time is left. The case rows below are illustrative, not real records — individual HMIS data is protected. The risk-factor model is grounded in a real 211 San Diego study (see the card below).
+        - generic [ref=e27]:
+          - button "All cases" [ref=e28]
+          - button "With children" [ref=e29]
+          - button "18–24" [ref=e30]
+          - button "Shelter exits" [ref=e31]
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e34]: Simulated case triage — ranked by urgency, not arrival order
+          - generic [ref=e35]: Illustrative rows · not real records
+        - generic [ref=e36]:
+          - generic [ref=e37]:
+            - table [ref=e38]:
+              - rowgroup [ref=e39]:
+                - row [ref=e40]:
+                  - columnheader "#" [ref=e41]
+                  - columnheader "Case" [ref=e42]
+                  - columnheader "Primary factor" [ref=e43]
+                  - columnheader "Days left" [ref=e44]
+                  - columnheader "Score" [ref=e45]
+              - rowgroup [ref=e46]:
+                - row [ref=e47]:
+                  - cell "1" [ref=e48]
+                  - cell "Case 4471" [ref=e49]
+                  - cell "Unemployed, eviction hearing in 3 days" [ref=e50]
+                  - cell "3d" [ref=e51]
+                  - cell "96" [ref=e52]
+                - row [ref=e53]:
+                  - cell "2" [ref=e54]
+                  - cell "Case 4502" [ref=e55]
+                  - cell "Shelter exit in 2 days, no plan" [ref=e56]
+                  - cell "2d" [ref=e57]
+                  - cell "94" [ref=e58]
+                - row [ref=e59]:
+                  - cell "3" [ref=e60]
+                  - cell "Case 4390" [ref=e61]
+                  - cell "Utility shutoff + 2 minor children" [ref=e62]
+                  - cell "5d" [ref=e63]
+                  - cell "89" [ref=e64]
+                - row [ref=e65]:
+                  - cell "4" [ref=e66]
+                  - cell "Case 4518" [ref=e67]
+                  - cell "Eviction hearing in 6 days" [ref=e68]
+                  - cell "6d" [ref=e69]
+                  - cell "85" [ref=e70]
+                - row [ref=e71]:
+                  - cell "5" [ref=e72]
+                  - cell "Case 4460" [ref=e73]
+                  - cell "Hospital discharge in 4 days, no address" [ref=e74]
+                  - cell "4d" [ref=e75]
+                  - cell "82" [ref=e76]
+                - row [ref=e77]:
+                  - cell "6" [ref=e78]
+                  - cell "Case 4525" [ref=e79]
+                  - cell "Shelter exit in 7 days" [ref=e80]
+                  - cell "7d" [ref=e81]
+                  - cell "78" [ref=e82]
+                - row [ref=e83]:
+                  - cell "7" [ref=e84]
+                  - cell "Case 4401" [ref=e85]
+                  - cell "Eviction, no support network" [ref=e86]
+                  - cell "8d" [ref=e87]
+                  - cell "74" [ref=e88]
+                - row [ref=e89]:
+                  - cell "8" [ref=e90]
+                  - cell "Case 4533" [ref=e91]
+                  - cell "78% rent burden, active pregnancy" [ref=e92]
+                  - cell "9d" [ref=e93]
+                  - cell "70" [ref=e94]
+            - paragraph [ref=e95]: Note — 3 critical, 3 high, and 2 moderate cases shown above are a simulated illustration of how the model would rank cases — not a real, current caseload.
+          - generic [ref=e96]:
+            - generic [ref=e97]: Methodology — what this model is grounded in
+            - paragraph [ref=e98]:
+              - generic [ref=e99]: "211 San Diego, \"Housing Instability in San Diego County\" Policy Brief, September 2019:"
+              - text: Only ~25% of people flagged as "unstably housed" via 211 calls actually became homeless within 4 months.
+            - generic [ref=e100]: Risk factors
+            - list [ref=e101]:
+              - listitem [ref=e102]: Unemployment
+              - listitem [ref=e103]: Education below high school/GED
+              - listitem [ref=e104]: Race (Black/African American households overrepresented)
+            - generic [ref=e105]: Protective factors
+            - list [ref=e106]:
+              - listitem [ref=e107]: Hispanic/Latino ethnicity
+              - listitem [ref=e108]: Employment
+      - paragraph [ref=e109]:
+        - text: See the
+        - link "Sources" [ref=e110] [cursor=pointer]:
+          - /url: /sources
+        - text: page for which indicators are drawn from public official data versus simulated for this prototype.

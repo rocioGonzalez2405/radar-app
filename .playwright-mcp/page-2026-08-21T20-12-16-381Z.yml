@@ -1,0 +1,120 @@
+- generic [ref=f4e3]:
+  - banner [ref=f4e4]:
+    - generic [ref=f4e5]:
+      - link "R Radar Downtown · Women's Homelessness Console" [ref=f4e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=f4e7]: R
+        - generic [ref=f4e8]:
+          - generic [ref=f4e9]: Radar
+          - generic [ref=f4e10]: Downtown · Women's Homelessness Console
+      - navigation [ref=f4e11]:
+        - link "Triage" [ref=f4e12] [cursor=pointer]:
+          - /url: /
+        - link "Forecast" [ref=f4e13] [cursor=pointer]:
+          - /url: /forecast
+        - link "Capacity" [ref=f4e14] [cursor=pointer]:
+          - /url: /capacity
+        - link "Investment" [ref=f4e15] [cursor=pointer]:
+          - /url: /simulator
+        - link "Sources" [ref=f4e16] [cursor=pointer]:
+          - /url: /sources
+        - link "AffordAI" [ref=f4e17] [cursor=pointer]:
+          - /url: /affordai
+      - link "Start a project" [ref=f4e19] [cursor=pointer]:
+        - /url: /portal
+  - main [ref=f4e20]:
+    - generic [ref=f4e21]:
+      - generic [ref=f4e22]:
+        - generic [ref=f4e23]:
+          - generic [ref=f4e24]: Get involved
+          - heading "Impact Portal" [level=1] [ref=f4e25]
+          - paragraph [ref=f4e26]: Browse projects published by local organizations and find the best way to help — money, time, or professional skills.
+        - link "Publish a project" [ref=f4e27] [cursor=pointer]:
+          - /url: /portal/new
+      - generic [ref=f4e28]:
+        - generic [ref=f4e29]: Filter by support type
+        - generic [ref=f4e31]:
+          - button "All" [ref=f4e32]
+          - button "Money" [ref=f4e33]
+          - button "Volunteer" [ref=f4e34]
+          - button "Legal" [ref=f4e35]
+          - button "Medical" [ref=f4e36]
+          - button "Other professional" [ref=f4e37]
+      - generic [ref=f4e38]:
+        - link "AUG 24 Money Downtown Family Shelter Fund Keep Downtown Families Off the Street Downtown, San Diego Emergency shelter, childcare, and rapid rehousing so women and their children downtown don't fall into street homelessness while they wait for a permanent bed." [ref=f4e39] [cursor=pointer]:
+          - /url: /portal/proj-1
+          - generic [ref=f4e40]:
+            - generic [ref=f4e42]:
+              - generic [ref=f4e43]: AUG
+              - generic [ref=f4e44]: "24"
+            - generic [ref=f4e45]:
+              - generic [ref=f4e46]: Money
+              - generic [ref=f4e48]: Downtown Family Shelter Fund
+              - generic [ref=f4e49]: Keep Downtown Families Off the Street
+              - generic [ref=f4e50]: Downtown, San Diego
+              - paragraph [ref=f4e55]: Emergency shelter, childcare, and rapid rehousing so women and their children downtown don't fall into street homelessness while they wait for a permanent bed.
+        - link "AUG 22 Volunteer Riverside Outreach Collective Weekend Street Outreach Team Riverside District, San Diego Volunteers hand out hygiene kits, hot meals, and warm layers on weekend outreach routes downtown, and help connect people to shelter intake." [ref=f4e58] [cursor=pointer]:
+          - /url: /portal/proj-2
+          - generic [ref=f4e59]:
+            - generic [ref=f4e61]:
+              - generic [ref=f4e62]: AUG
+              - generic [ref=f4e63]: "22"
+            - generic [ref=f4e64]:
+              - generic [ref=f4e65]: Volunteer
+              - generic [ref=f4e67]: Riverside Outreach Collective
+              - generic [ref=f4e68]: Weekend Street Outreach Team
+              - generic [ref=f4e69]: Riverside District, San Diego
+              - paragraph [ref=f4e74]: Volunteers hand out hygiene kits, hot meals, and warm layers on weekend outreach routes downtown, and help connect people to shelter intake.
+        - link "AUG 26 Legal Tenant Defense Network Eviction Defense Legal Aid Downtown Courthouse, San Diego Free legal representation for tenants downtown facing eviction hearings within the next 30 days, prioritizing families with children." [ref=f4e75] [cursor=pointer]:
+          - /url: /portal/proj-3
+          - generic [ref=f4e76]:
+            - generic [ref=f4e78]:
+              - generic [ref=f4e79]: AUG
+              - generic [ref=f4e80]: "26"
+            - generic [ref=f4e81]:
+              - generic [ref=f4e82]: Legal
+              - generic [ref=f4e84]: Tenant Defense Network
+              - generic [ref=f4e85]: Eviction Defense Legal Aid
+              - generic [ref=f4e86]: Downtown Courthouse, San Diego
+              - paragraph [ref=f4e91]: Free legal representation for tenants downtown facing eviction hearings within the next 30 days, prioritizing families with children.
+        - link "AUG 23 Legal Pro Bono Housing Law Corps Volunteer Attorney Signup — Housing Docket Civic Center, San Diego We need licensed attorneys and law students to donate a few hours a month reviewing eviction filings and coaching tenants for hearings." [ref=f4e92] [cursor=pointer]:
+          - /url: /portal/proj-4
+          - generic [ref=f4e93]:
+            - generic [ref=f4e95]:
+              - generic [ref=f4e96]: AUG
+              - generic [ref=f4e97]: "23"
+            - generic [ref=f4e98]:
+              - generic [ref=f4e99]: Legal
+              - generic [ref=f4e101]: Pro Bono Housing Law Corps
+              - generic [ref=f4e102]: Volunteer Attorney Signup — Housing Docket
+              - generic [ref=f4e103]: Civic Center, San Diego
+              - paragraph [ref=f4e108]: We need licensed attorneys and law students to donate a few hours a month reviewing eviction filings and coaching tenants for hearings.
+        - link "AUG 25 Medical Volunteer Downtown Community Health Van Mobile Health Van — Volunteer Clinicians East Village, San Diego Nurses, EMTs, and physicians staff a weekly mobile clinic for people experiencing homelessness, screening for urgent conditions before they become ER visits." [ref=f4e109] [cursor=pointer]:
+          - /url: /portal/proj-5
+          - generic [ref=f4e110]:
+            - generic [ref=f4e112]:
+              - generic [ref=f4e113]: AUG
+              - generic [ref=f4e114]: "25"
+            - generic [ref=f4e115]:
+              - generic [ref=f4e116]:
+                - generic [ref=f4e117]: Medical
+                - generic [ref=f4e118]: Volunteer
+              - generic [ref=f4e119]: Downtown Community Health Van
+              - generic [ref=f4e120]: Mobile Health Van — Volunteer Clinicians
+              - generic [ref=f4e121]: East Village, San Diego
+              - paragraph [ref=f4e126]: Nurses, EMTs, and physicians staff a weekly mobile clinic for people experiencing homelessness, screening for urgent conditions before they become ER visits.
+        - link "AUG 28 Other professional Money Rehousing Tech Initiative Case Management Software Overhaul Remote / Downtown HQ, San Diego We need pro-bono help modernizing the case-tracking tools our intake staff use daily — from data cleanup to a simple new dashboard." [ref=f4e127] [cursor=pointer]:
+          - /url: /portal/proj-6
+          - generic [ref=f4e128]:
+            - generic [ref=f4e130]:
+              - generic [ref=f4e131]: AUG
+              - generic [ref=f4e132]: "28"
+            - generic [ref=f4e133]:
+              - generic [ref=f4e134]:
+                - generic [ref=f4e135]: Other professional
+                - generic [ref=f4e136]: Money
+              - generic [ref=f4e137]: Rehousing Tech Initiative
+              - generic [ref=f4e138]: Case Management Software Overhaul
+              - generic [ref=f4e139]: Remote / Downtown HQ, San Diego
+              - paragraph [ref=f4e144]: We need pro-bono help modernizing the case-tracking tools our intake staff use daily — from data cleanup to a simple new dashboard.
+      - paragraph [ref=f4e147]: Reading it — projects above are seeded prototype data plus anything published this session; nothing here is stored beyond this browser session.
