@@ -11,6 +11,7 @@ import { AffordShell } from '@/affordai/layout/AffordShell'
 import { OverviewPage } from '@/affordai/pages/Overview/OverviewPage'
 import { HouseholdsPage } from '@/affordai/pages/Households/HouseholdsPage'
 import { HouseholdDetailPage } from '@/affordai/pages/HouseholdDetail/HouseholdDetailPage'
+import { VulnerabilityPage } from '@/affordai/pages/Vulnerability/VulnerabilityPage'
 
 export const AppRoutes = () => (
   <Routes>
@@ -28,6 +29,7 @@ export const AppRoutes = () => (
         <Route path={ROUTES.affordai.overview} element={<OverviewPage />} />
         <Route path={ROUTES.affordai.households} element={<HouseholdsPage />} />
         <Route path={ROUTES.affordai.householdDetail} element={<HouseholdDetailPage />} />
+        <Route path={ROUTES.affordai.vulnerability} element={<VulnerabilityPage />} />
       </Route>
     </Route>
   </Routes>
