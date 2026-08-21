@@ -2336,7 +2336,7 @@ git commit -m "feat(affordai): add route namespace, sidebar shell, and overview 
   - `RangeToggle({ value, onChange }: { value: TimeRange; onChange: (range: TimeRange) => void })`
   - `AiInsight({ children }: { children: ReactNode })`
 
-**Note.** Radar's chart wrappers are not reusable — their `dataKey` values hard-code Radar's domain (`criticalCases`, `bedCapacity`, see `src/shared/charts/RadarCharts.tsx:120`). This module copies Radar's `GRID_COLOR`, `TICK_STYLE`, and `tooltipStyle` constants verbatim so both products render identically.
+**Note.** Radar's chart module does not contain the shapes AffordAI needs. After the `origin/main` merge it exports only `IndicatorAreaChart` and `SubgroupChangeBarChart`; the stacked tier area, the dashed-projection forecast line, the horizontal factor bars, the grouped before/after bars, and the dual-axis score timeline all have no counterpart there. This module copies Radar's `GRID_COLOR`, `TICK_STYLE`, and `tooltipStyle` constants verbatim — verified unchanged by that merge — so both products render identically.
 
 - [ ] **Step 1: Write the chart module**
 

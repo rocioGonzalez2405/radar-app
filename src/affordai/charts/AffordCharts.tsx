@@ -14,8 +14,8 @@ import {
 import type { ForecastPoint, RiskFactor, VulnerabilityPoint } from '@/affordai/data/types'
 
 // Copied verbatim from src/shared/charts/RadarCharts.tsx so both products render
-// identically. Radar's wrappers themselves are not reusable here: their dataKey
-// values hard-code Radar's domain.
+// identically. Radar's wrappers themselves are not reused: that module has no
+// counterpart for the chart shapes this section needs.
 const GRID_COLOR = '#22304a'
 const TICK_STYLE = { fill: '#9aa7c2', fontSize: 11 }
 const tooltipStyle = {
