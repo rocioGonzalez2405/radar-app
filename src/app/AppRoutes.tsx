@@ -9,6 +9,7 @@ import { SourcesPage } from '@/pages/Sources/SourcesPage'
 import { DonatePage } from '@/pages/Donate/DonatePage'
 import { AffordShell } from '@/affordai/layout/AffordShell'
 import { OverviewPage } from '@/affordai/pages/Overview/OverviewPage'
+import { HouseholdsPage } from '@/affordai/pages/Households/HouseholdsPage'
 
 export const AppRoutes = () => (
   <Routes>
@@ -24,6 +25,7 @@ export const AppRoutes = () => (
           the section's sidebar. */}
       <Route element={<AffordShell />}>
         <Route path={ROUTES.affordai.overview} element={<OverviewPage />} />
+        <Route path={ROUTES.affordai.households} element={<HouseholdsPage />} />
       </Route>
     </Route>
   </Routes>
