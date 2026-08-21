@@ -1178,7 +1178,7 @@ export const vulnerabilitySeries = (range: TimeRange): VulnerabilityPoint[] => {
 - [ ] **Step 5: Run the test to verify it passes**
 
 Run: `npm test -- --run src/affordai/data/selectors.test.ts`
-Expected: PASS — 11 tests. If `subsidiesAllocated` is not 184000, adjust the `5.4` multiplier in `kpis()` — it is a scaling constant, not a derived value.
+Expected: PASS — 13 tests. If `subsidiesAllocated` is not 184000, adjust the `5.4` multiplier in `kpis()` — it is a scaling constant, not a derived value. Task 3b's recalibration shifted the subsidy curve, so the value that actually lands on 184000 is **6.24**; Task 16 reuses the same constant.
 
 - [ ] **Step 6: Typecheck, then commit**
 
@@ -2829,7 +2829,7 @@ Expected: no output, exit 0.
 
 Open `http://localhost:5175/affordai` and scroll to Geographic view. Confirm:
 - Four area rows — Downtown, Eastside, North County, South County — each with a vulnerability badge, a proportional coral bar, and a household count
-- Eastside is selected by default and has the longest bar
+- The measured rates after Task 3b are **Eastside 33.2%**, **South County 14.2%**, **Downtown 8.2%**, **North County 1.8%**. Eastside is selected by default, carries the `crit` badge tone, and has the full-width bar; North County's bar is a thin sliver, which is correct rather than broken.
 - The four household counts sum to **12,482**
 - Clicking each area updates the detail panel's title and all six metrics; no metric shows `NaN` or `undefined`
 - Console clean
@@ -3939,6 +3939,9 @@ export const VulnerabilityPage = () => {
   const counts = tierCounts()
   const areas = areaDetails()
   const bands = vulnerabilityByIncomeBand()
+  // Scale the bars against the worst area, not a fixed reference: after the
+  // Task 3b recalibration Eastside sits at 33.2%, which would overflow a 30% scale.
+  const worstRate = Math.max(...areas.map((area) => area.vulnerabilityRate))
 
   const cohorts = [
     { label: 'Stable', value: counts.stable, color: AFFORD_CHART_COLORS.stable },
@@ -4024,13 +4027,16 @@ export const VulnerabilityPage = () => {
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-ink-2">
                     <div
                       className="h-full rounded-full bg-amber"
-                      style={{ width: `${(area.vulnerabilityRate / 30) * 100}%` }}
+                      style={{ width: `${(area.vulnerabilityRate / worstRate) * 100}%` }}
                     />
                   </div>
                 </div>
               ))}
           </div>
-          <Footnote>Bars are scaled against a 30% reference rate.</Footnote>
+          <Footnote>
+            Bars are scaled against the highest area rate ({worstRate}%), not an absolute
+            reference.
+          </Footnote>
         </Card>
 
         <Card>
@@ -4088,7 +4094,7 @@ Run: `npm run typecheck`
 Open `http://localhost:5175/affordai/vulnerability`. Confirm:
 - Three cohort cards summing to **12,482**, reading **10,636** stable, **1,223** emerging, **623** high risk
 - The stacked chart and range toggle behave as on Overview
-- By area: four bars, Eastside highest
+- By area: four bars reading Eastside **33.2%**, South County **14.2%**, Downtown **8.2%**, North County **1.8%** — Eastside's bar is full width and the footnote names 33.2% as the scale
 - By income band: four rows, households column sums to **12,482**, vulnerable column sums to **1,846**, and the rate falls as income rises
 - Console clean
 
@@ -4436,7 +4442,8 @@ export const subsidyAllocations = (): SubsidyAllocation[] =>
       areaLabel: area.label,
       households: rows.length,
       averageSubsidy: Number(averageSubsidy.toFixed(1)),
-      monthlyCost: Math.round(rows.length * averageSubsidy * 5.4),
+      // 6.24 is the same scaling constant kpis() uses; the two must stay in sync.
+      monthlyCost: Math.round(rows.length * averageSubsidy * 6.24),
     }
   })
 ```
