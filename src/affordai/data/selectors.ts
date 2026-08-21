@@ -9,6 +9,7 @@ import type {
   TimeRange,
   VulnerabilityPoint,
 } from '@/affordai/data/types'
+import type { HouseholdPage, HouseholdQuery } from '@/affordai/data/types'
 
 /**
  * Every page reads this module. No page imports a data module directly, so
@@ -107,4 +108,55 @@ export const vulnerabilitySeries = (range: TimeRange): VulnerabilityPoint[] => {
       highRisk,
     }
   })
+}
+
+export const DEFAULT_QUERY: HouseholdQuery = {
+  search: '',
+  area: 'all',
+  tier: 'all',
+  incomeBand: 'all',
+  sortBy: 'affordabilityScore',
+  sortDir: 'asc',
+  page: 1,
+  pageSize: 25,
+}
+
+const INCOME_BANDS: Record<HouseholdQuery['incomeBand'], [number, number]> = {
+  all: [0, Number.POSITIVE_INFINITY],
+  'under-3000': [0, 3000],
+  '3000-5000': [3000, 5000],
+  '5000-7000': [5000, 7000],
+  'over-7000': [7000, Number.POSITIVE_INFINITY],
+}
+
+export const searchHouseholds = (query: HouseholdQuery): HouseholdPage => {
+  const needle = query.search.trim().toLowerCase()
+  const [minIncome, maxIncome] = INCOME_BANDS[query.incomeBand]
+
+  const matched = households.filter((household) => {
+    if (query.area !== 'all' && household.area !== query.area) return false
+    if (query.tier !== 'all' && household.tier !== query.tier) return false
+    if (household.monthlyIncome < minIncome || household.monthlyIncome >= maxIncome) {
+      return false
+    }
+    if (!needle) return true
+    if (String(household.id).includes(needle)) return true
+    return areaById(household.area).label.toLowerCase().includes(needle)
+  })
+
+  const direction = query.sortDir === 'asc' ? 1 : -1
+  const sorted = matched.sort(
+    (a, b) => (a[query.sortBy] - b[query.sortBy]) * direction || a.id - b.id,
+  )
+
+  const pageCount = Math.max(1, Math.ceil(sorted.length / query.pageSize))
+  const page = Math.min(Math.max(1, query.page), pageCount)
+  const start = (page - 1) * query.pageSize
+
+  return {
+    rows: sorted.slice(start, start + query.pageSize),
+    total: sorted.length,
+    page,
+    pageCount,
+  }
 }
