@@ -15,6 +15,7 @@ import { VulnerabilityPage } from '@/affordai/pages/Vulnerability/VulnerabilityP
 import { PredictionsPage } from '@/affordai/pages/Predictions/PredictionsPage'
 import { ImpactPage } from '@/affordai/pages/Impact/ImpactPage'
 import { SubsidiesPage } from '@/affordai/pages/Subsidies/SubsidiesPage'
+import { MarketPricesPage } from '@/affordai/pages/MarketPrices/MarketPricesPage'
 
 export const AppRoutes = () => (
   <Routes>
@@ -36,6 +37,7 @@ export const AppRoutes = () => (
         <Route path={ROUTES.affordai.predictions} element={<PredictionsPage />} />
         <Route path={ROUTES.affordai.impact} element={<ImpactPage />} />
         <Route path={ROUTES.affordai.subsidies} element={<SubsidiesPage />} />
+        <Route path={ROUTES.affordai.marketPrices} element={<MarketPricesPage />} />
       </Route>
     </Route>
   </Routes>

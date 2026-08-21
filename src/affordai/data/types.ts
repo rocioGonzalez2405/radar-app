@@ -109,6 +109,16 @@ export interface Product {
   id: string
   label: string
   category: ProductCategory
+  /**
+   * The quantity every price on this row is measured against, e.g. `per gallon`.
+   *
+   * Required, and required for a reason: the reported rows come from BLS average
+   * price series whose units disagree with one another — rice is per pound,
+   * eggs per dozen — so a price column without the quantity on every row is not
+   * a comparison, it is a category error. Rendered beside the label, never
+   * inside a price cell.
+   */
+  unit: string
   marketPrice: number
   currentPrice: number
   recommendedPrice: number
