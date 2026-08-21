@@ -26,7 +26,10 @@ export interface RiskFeatures {
   negativeBalanceRate: number
   /** Coefficient of variation of income over the last twelve months. */
   incomeVolatility: number
-  /** Household size, rescaled from the 1..7 generated range onto 0..1. */
+  /**
+   * Household size, rescaled from the 1..7 generated range onto 0..1.
+   * AUDIT ONLY — measured and displayed, never weighted. See AUDIT_KEYS.
+   */
   householdSize: number
   /** Employment stability inverted: High is 0, Low is 1. */
   employmentInstability: number
@@ -54,6 +57,43 @@ export const FEATURE_LABELS: Record<FeatureKey, string> = {
 }
 
 export const FEATURE_KEYS = Object.keys(FEATURE_LABELS) as FeatureKey[]
+
+/**
+ * Features computed for AUDIT ONLY. Measured, displayed, never weighted.
+ *
+ * The proposal asks for exactly this separation: "separar las variables usadas
+ * para predecir de aquellas usadas solamente para auditar posibles sesgos."
+ *
+ * WHY householdSize IS HERE. Size used to carry its own coefficient of 1.2 on
+ * top of the essentials channel it already flows through, and the consequence
+ * was not subtle: no household of one or two people could reach the top support
+ * band at all. Their risk was capped at 0.65 against a 0.70 threshold — 3,545
+ * households excluded from the 40% band by arithmetic rather than by
+ * assessment.
+ *
+ * The economic reality of a larger household is real and the model still sees
+ * it, through `essentialsBurden`: more people, higher essential spending, a
+ * larger monthly gap. That path is explicit, measurable, and carries a
+ * coefficient of 3.0. What was removed is the SECOND, unevidenced claim that
+ * size implies extra risk beyond the costs it actually creates. With hand-set
+ * coefficients and no ground truth to fit against, that claim had nothing
+ * behind it, and family composition is at least as sensitive as the geography
+ * we were already careful with.
+ *
+ * This is a list, not a zero coefficient, on purpose. A zero is one careless
+ * edit away from coming back; a key that the model never iterates cannot.
+ */
+export const AUDIT_KEYS = ['householdSize'] as const satisfies readonly FeatureKey[]
+
+export type AuditFeatureKey = (typeof AUDIT_KEYS)[number]
+export type PredictiveFeatureKey = Exclude<FeatureKey, AuditFeatureKey>
+
+const AUDIT_SET = new Set<string>(AUDIT_KEYS)
+
+/** The features the model is actually allowed to weight. */
+export const PREDICTIVE_KEYS = FEATURE_KEYS.filter(
+  (key): key is PredictiveFeatureKey => !AUDIT_SET.has(key),
+)
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value))

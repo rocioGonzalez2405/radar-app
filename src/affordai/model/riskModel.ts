@@ -1,5 +1,5 @@
-import { FEATURE_KEYS, FEATURE_LABELS, featuresFor } from '@/affordai/model/features'
-import type { FeatureKey, RiskFeatures } from '@/affordai/model/features'
+import { FEATURE_LABELS, PREDICTIVE_KEYS, featuresFor } from '@/affordai/model/features'
+import type { PredictiveFeatureKey, RiskFeatures } from '@/affordai/model/features'
 import type { Household, RiskFactor } from '@/affordai/data/types'
 
 /**
@@ -43,19 +43,31 @@ import type { Household, RiskFactor } from '@/affordai/data/types'
  */
 export const HORIZON_DAYS = 90
 
-export const COEFFICIENTS: Record<FeatureKey, number> = {
+/**
+ * Eight weights, one per predictive feature. `householdSize` is deliberately
+ * absent — it is audit-only, and the type will not let it back in. See
+ * AUDIT_KEYS in features.ts for why.
+ */
+export const COEFFICIENTS: Record<PredictiveFeatureKey, number> = {
   rentBurden: 6.0,
   essentialsBurden: 3.0,
   incomeDrop6m: 8.0,
   rentGrowth12m: 5.0,
   negativeBalanceRate: 3.0,
   incomeVolatility: 4.0,
-  householdSize: 1.2,
   employmentInstability: 1.5,
   areaPressure: 0.8,
 }
 
-export const INTERCEPT = -7.0
+/**
+ * Re-centred from -7.0 when householdSize was dropped, by the exact weight the
+ * baseline household used to carry through it: 1.2 * 0.501 = 0.601.
+ *
+ * That keeps a typical household's probability where it was, so the removal
+ * shows up as a change in who is ranked highest — which is the point — rather
+ * than as every probability in the console sliding down at once.
+ */
+export const INTERCEPT = -6.399
 
 /**
  * The reference household every explanation is measured against: roughly the
@@ -87,7 +99,7 @@ export const BASELINE: RiskFeatures = {
 export const BASELINE_TOLERANCE = 0.03
 
 export interface FeatureContribution {
-  key: FeatureKey
+  key: PredictiveFeatureKey
   label: string
   /** Signed logit contribution. Positive pushes risk up, negative pulls it down. */
   value: number
@@ -117,7 +129,7 @@ export const predictRisk = (features: RiskFeatures): RiskPrediction => {
   let logit = INTERCEPT
   const contributions: FeatureContribution[] = []
 
-  for (const key of FEATURE_KEYS) {
+  for (const key of PREDICTIVE_KEYS) {
     logit += COEFFICIENTS[key] * features[key]
     contributions.push({
       key,

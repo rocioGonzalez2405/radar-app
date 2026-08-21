@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { households } from '@/affordai/data/households'
-import { FEATURE_KEYS, featuresFor } from '@/affordai/model/features'
+import { AUDIT_KEYS, FEATURE_KEYS, PREDICTIVE_KEYS, featuresFor } from '@/affordai/model/features'
 import type { RiskFeatures } from '@/affordai/model/features'
 import {
   BASELINE,
@@ -27,7 +27,7 @@ describe('logistic risk model', () => {
   it('computes the logit as intercept plus the weighted features', () => {
     for (const household of households.slice(0, 300)) {
       const features = featuresFor(household)
-      const expected = FEATURE_KEYS.reduce(
+      const expected = PREDICTIVE_KEYS.reduce(
         (total, key) => total + COEFFICIENTS[key] * features[key],
         INTERCEPT,
       )
@@ -42,7 +42,7 @@ describe('logistic risk model', () => {
    * than no explanation.
    */
   it('reconciles contributions with the distance from the baseline logit', () => {
-    const baselineLogit = FEATURE_KEYS.reduce(
+    const baselineLogit = PREDICTIVE_KEYS.reduce(
       (total, key) => total + COEFFICIENTS[key] * BASELINE[key],
       INTERCEPT,
     )
@@ -57,10 +57,10 @@ describe('logistic risk model', () => {
     }
   })
 
-  it('returns one contribution per feature, sorted by influence', () => {
+  it('returns one contribution per predictive feature, sorted by influence', () => {
     const { contributions } = predictRiskFor(households[0])
-    expect(contributions).toHaveLength(FEATURE_KEYS.length)
-    expect(new Set(contributions.map((c) => c.key)).size).toBe(FEATURE_KEYS.length)
+    expect(contributions).toHaveLength(PREDICTIVE_KEYS.length)
+    expect(new Set(contributions.map((c) => c.key)).size).toBe(PREDICTIVE_KEYS.length)
 
     const magnitudes = contributions.map((c) => Math.abs(c.value))
     expect(magnitudes).toEqual([...magnitudes].sort((a, b) => b - a))
@@ -98,11 +98,73 @@ describe('logistic risk model', () => {
 
   it('moves risk in the direction every coefficient claims', () => {
     const base = featuresFor(households[0])
-    for (const key of FEATURE_KEYS) {
+    for (const key of PREDICTIVE_KEYS) {
       const raised = predictRisk({ ...base, [key]: base[key] + 0.1 }).logit
       const lowered = predictRisk({ ...base, [key]: base[key] - 0.1 }).logit
       expect(raised).toBeGreaterThan(lowered)
     }
+  })
+})
+
+/**
+ * The separation the proposal's fairness section asks for, enforced rather than
+ * documented. `householdSize` used to carry its own coefficient on top of the
+ * essentials channel it already flows through, and the consequence was that no
+ * household of one or two people could reach the top support band at any income
+ * or rent burden — 3,545 households capped below the threshold by arithmetic.
+ */
+describe('audit-only variables', () => {
+  it('measures household size without weighting it', () => {
+    expect(AUDIT_KEYS).toContain('householdSize')
+    expect(PREDICTIVE_KEYS).not.toContain('householdSize')
+    expect(featuresFor(households[0]).householdSize).toBeGreaterThanOrEqual(0)
+  })
+
+  it('cannot change a prediction by any amount', () => {
+    const base = featuresFor(households[0])
+    const reference = predictRisk(base).logit
+
+    for (const key of AUDIT_KEYS) {
+      for (const value of [0, 0.25, 0.5, 0.75, 1]) {
+        expect(predictRisk({ ...base, [key]: value }).logit).toBe(reference)
+      }
+    }
+  })
+
+  it('never appears in an explanation', () => {
+    for (const household of households.slice(0, 200)) {
+      const keys = predictRiskFor(household).contributions.map((c) => c.key)
+      for (const audited of AUDIT_KEYS) expect(keys).not.toContain(audited)
+    }
+  })
+
+  /**
+   * The regression this whole change exists to prevent, proved structurally
+   * rather than by what the generated population happens to contain.
+   *
+   * A single person in genuine distress must be able to reach the top band. The
+   * old model made that impossible at any input; this asserts the ceiling is
+   * gone from the arithmetic itself.
+   */
+  it('lets a one-person household in real distress reach the top support band', () => {
+    const distressed: RiskFeatures = {
+      rentBurden: 0.62,
+      essentialsBurden: 0.34,
+      incomeDrop6m: 0.28,
+      rentGrowth12m: 0.19,
+      negativeBalanceRate: 0.5,
+      incomeVolatility: 0.12,
+      householdSize: 0, // one person — the value that used to cap the result
+      employmentInstability: 1,
+      areaPressure: 0.5,
+    }
+    expect(predictRisk(distressed).probability).toBeGreaterThanOrEqual(0.7)
+  })
+
+  it('reaches the top band for small households in the generated population too', () => {
+    const small = households.filter((household) => household.size <= 2)
+    expect(small.length).toBeGreaterThan(1000)
+    expect(small.some((household) => household.riskProbability >= 0.7)).toBe(true)
   })
 })
 
