@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { to: ROUTES.radar.capacity, label: 'Capacity' },
   { to: ROUTES.radar.simulator, label: 'Simulator' },
   { to: ROUTES.radar.sources, label: 'Sources' },
+  { to: ROUTES.affordai.overview, label: 'AffordAI' },
 ]
 
 const navLinkClass = (isActive: boolean) =>
