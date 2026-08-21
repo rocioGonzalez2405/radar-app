@@ -13,6 +13,7 @@ import { HouseholdsPage } from '@/affordai/pages/Households/HouseholdsPage'
 import { HouseholdDetailPage } from '@/affordai/pages/HouseholdDetail/HouseholdDetailPage'
 import { VulnerabilityPage } from '@/affordai/pages/Vulnerability/VulnerabilityPage'
 import { PredictionsPage } from '@/affordai/pages/Predictions/PredictionsPage'
+import { ImpactPage } from '@/affordai/pages/Impact/ImpactPage'
 
 export const AppRoutes = () => (
   <Routes>
@@ -32,6 +33,7 @@ export const AppRoutes = () => (
         <Route path={ROUTES.affordai.householdDetail} element={<HouseholdDetailPage />} />
         <Route path={ROUTES.affordai.vulnerability} element={<VulnerabilityPage />} />
         <Route path={ROUTES.affordai.predictions} element={<PredictionsPage />} />
+        <Route path={ROUTES.affordai.impact} element={<ImpactPage />} />
       </Route>
     </Route>
   </Routes>
