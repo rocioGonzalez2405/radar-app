@@ -24,6 +24,31 @@
 - Tests are for the data layer only. No component tests, no jsdom, no test-only dependencies beyond Vitest.
 - Copy strings quoted in this plan are exact. Do not paraphrase user-facing text.
 
+## Structural amendment — AffordAI is a nested section, not a sibling product
+
+Applied after Task 10, in commits `2402b54` and `b718fc0`. It supersedes the shell and routing shape written into Tasks 7, 10, and 19 below; those code blocks are kept as the historical record of what was built, not as instructions to follow.
+
+**What changed.** AffordAI originally mounted as a sibling route subtree with its own full-screen shell, so entering it replaced the whole page and Radar's top bar disappeared. It now nests **inside** `AppShell`:
+
+```tsx
+<Route element={<AppShell />}>
+  …six Radar routes…
+  <Route element={<AffordShell />}>
+    …AffordAI routes…
+  </Route>
+</Route>
+```
+
+Radar's top bar stays visible above AffordAI and marks **AffordAI** as the active nav item — it is the sixth entry in `AppShell`'s `NAV_ITEMS`, already added. `AffordShell` contributes only the section's own navigation beside its content: it owns no background, no `min-h-screen`, no `max-w`, and no padding, because `AppShell`'s `<main>` already provides all four.
+
+**Consequences for the remaining tasks:**
+
+- `AffordShell` renders a `<aside className="hidden w-[220px] … md:flex">` next to `<div className="min-w-0 flex-1"><Outlet /></div>`. Page content is therefore ~220px narrower than a full-width page. Grid columns in later tasks should stay responsive; do not hard-code widths that assume the full 1360px.
+- Below `md` the sidebar becomes a horizontally scrollable pill row, not a toggled drawer. Radar's top bar owns the only Menu toggle, and a second one would be confusing.
+- `AffordStoreProvider` is still the outermost element of `AffordShell`, above the `<Outlet />`. That invariant is unchanged and still load-bearing for demo steps 9 and 10.
+- Task 19's cross-link steps are obsolete: the top-bar entry exists, and the "← Radar console" link in the sidebar footer is no longer needed because the top bar never leaves.
+- The sidebar is not sticky. Long pages scroll past it. Making it sticky needs a magic offset matching `AppShell`'s header height, which is why it was left out; add it only after measuring in a browser.
+
 ## Verification Commands
 
 | Command | When |
@@ -5056,34 +5081,9 @@ export const NAV_ITEMS: NavItem[] = [
 ]
 ```
 
-- [ ] **Step 2: Link from AffordAI back to Radar**
+- [x] **Step 2: Link from AffordAI back to Radar** — **OBSOLETE, do not do this.** See the Structural amendment near the top of this plan. Radar's top bar never leaves the screen, so a "← Radar console" link in the sidebar footer would be redundant chrome. Leave `AffordShell`'s footer as it is: the AI Model Status card followed by the disclaimer.
 
-In `src/affordai/layout/AffordShell.tsx`, add the import:
-
-```tsx
-import { Link } from 'react-router'
-```
-
-Insert this directly after `<Disclaimer />` in the sidebar footer:
-
-```tsx
-          <Link
-            to={ROUTES.radar.triage}
-            className="font-mono text-[11px] text-text-low hover:text-text-hi"
-          >
-            ← Radar console
-          </Link>
-```
-
-- [ ] **Step 3: Link from Radar to AffordAI**
-
-In `src/layouts/AppShell/AppShell.tsx`, add one entry to the end of `NAV_ITEMS`:
-
-```ts
-  { to: ROUTES.affordai.overview, label: 'AffordAI' },
-```
-
-The existing `navLinkClass` and `NavLink` rendering handle it with no other change. Do not restyle Radar's header.
+- [x] **Step 3: Link from Radar to AffordAI** — **ALREADY DONE** in commit `2402b54`. `{ to: ROUTES.affordai.overview, label: 'AffordAI' }` is the sixth entry in `AppShell`'s `NAV_ITEMS`. Because `end` is false for it, the item stays active across every `/affordai/*` subroute. Verify it is still there; do not add it twice, and do not restyle Radar's header.
 
 - [ ] **Step 4: Update the README**
 
