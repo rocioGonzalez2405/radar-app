@@ -2,6 +2,7 @@ import { NavLink, Outlet } from 'react-router'
 import { ROUTES } from '@/app/routes'
 import { Disclaimer } from '@/affordai/components/Disclaimer'
 import { PROVENANCE_SUMMARY } from '@/affordai/data/sources'
+import { HORIZON_DAYS } from '@/affordai/model/riskModel'
 import { NAV_ITEMS } from '@/affordai/layout/navItems'
 import { AffordStoreProvider } from '@/affordai/state/AffordStore'
 
@@ -68,9 +69,18 @@ export const AffordShell = () => (
                 <dt>Model</dt>
                 <dd className="text-text-hi">Affordability v1.4</dd>
               </div>
+              {/* The brief asks for "Last updated: 2 hours ago" here. There is no
+                  update process to report: the coefficients are hand-set constants
+                  in riskModel.ts. Settings says "hand-set, not fitted" a click away,
+                  so a freshness claim in this panel would contradict our own model
+                  card. Same three rows, one true value instead. */}
               <div className="flex justify-between gap-2">
-                <dt>Updated</dt>
-                <dd className="text-text-hi">2 hours ago</dd>
+                <dt>Calibration</dt>
+                <dd className="text-text-hi">Hand-set</dd>
+              </div>
+              <div className="flex justify-between gap-2">
+                <dt>Horizon</dt>
+                <dd className="text-text-hi">{HORIZON_DAYS} days</dd>
               </div>
               <div className="flex justify-between gap-2">
                 <dt>Status</dt>
