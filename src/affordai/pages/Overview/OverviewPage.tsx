@@ -3,6 +3,7 @@ import { Kpi } from '@/shared/ui/Kpi'
 import { Card, Legend, SectionHead } from '@/shared/ui/Card'
 import { AFFORD_CHART_COLORS, VulnerabilityStackChart } from '@/affordai/charts/AffordCharts'
 import { AiInsight } from '@/affordai/components/AiInsight'
+import { GeoPanel } from '@/affordai/components/GeoPanel'
 import { RangeToggle } from '@/affordai/components/RangeToggle'
 import { kpis, vulnerabilitySeries } from '@/affordai/data/selectors'
 import type { TimeRange } from '@/affordai/data/types'
@@ -87,6 +88,8 @@ export const OverviewPage = () => {
           </AiInsight>
         </div>
       </Card>
+
+      <GeoPanel />
     </div>
   )
 }
