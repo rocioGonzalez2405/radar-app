@@ -10,6 +10,17 @@ import type {
   VulnerabilityPoint,
 } from '@/affordai/data/types'
 import type { HouseholdPage, HouseholdQuery } from '@/affordai/data/types'
+import { FORECAST } from '@/affordai/data/forecast'
+import { IMPACT } from '@/affordai/data/impact'
+import { PRODUCTS } from '@/affordai/data/products'
+import { RECOMMENDATIONS } from '@/affordai/data/recommendations'
+import type {
+  Forecast,
+  ImpactMetrics,
+  Product,
+  ProductCategory,
+  Recommendation,
+} from '@/affordai/data/types'
 
 /**
  * Every page reads this module. No page imports a data module directly, so
@@ -160,3 +171,14 @@ export const searchHouseholds = (query: HouseholdQuery): HouseholdPage => {
     pageCount,
   }
 }
+
+export const recommendations = (): Recommendation[] => RECOMMENDATIONS
+
+export const productsByCategory = (category: ProductCategory | 'all'): Product[] =>
+  category === 'all'
+    ? PRODUCTS
+    : PRODUCTS.filter((product) => product.category === category)
+
+export const forecast90d = (): Forecast => FORECAST
+
+export const impactMetrics = (): ImpactMetrics => IMPACT
