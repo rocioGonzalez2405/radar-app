@@ -58,3 +58,13 @@ describe('household population', () => {
     }
   })
 })
+
+describe('tier threshold coherence', () => {
+  it('puts the high-risk boundary above the hero score of 57', () => {
+    expect(tierThresholds.highRiskBelow).toBeGreaterThan(57)
+  })
+
+  it('separates the two boundaries', () => {
+    expect(tierThresholds.emergingBelow).toBeGreaterThan(tierThresholds.highRiskBelow)
+  })
+})

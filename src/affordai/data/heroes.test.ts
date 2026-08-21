@@ -32,3 +32,33 @@ describe('hero household #10482', () => {
     ])
   })
 })
+
+describe('hero coherence with the generated population', () => {
+  it('ranks the hero inside the high-risk cut on its own score', () => {
+    const ranked = [...households].sort(
+      (a, b) => a.affordabilityScore - b.affordabilityScore || a.id - b.id,
+    )
+    const heroRank = ranked.findIndex((h) => h.id === HERO_HOUSEHOLD_ID)
+    expect(heroRank).toBeGreaterThanOrEqual(0)
+    expect(heroRank).toBeLessThan(623)
+  })
+
+  it('keeps the hero risk probability inside the high-risk band', () => {
+    const generated = households.filter(
+      (h) => h.tier === 'high-risk' && h.id !== HERO_HOUSEHOLD_ID,
+    )
+    const maxRisk = Math.max(...generated.map((h) => h.riskProbability))
+    expect(maxRisk).toBeGreaterThanOrEqual(0.82)
+  })
+
+  it('keeps the hero subsidy unremarkable among high-risk households', () => {
+    const generated = households.filter(
+      (h) => h.tier === 'high-risk' && h.id !== HERO_HOUSEHOLD_ID,
+    )
+    const subsidies = generated.map((h) => h.currentSubsidy)
+    expect(Math.min(...subsidies)).toBeGreaterThanOrEqual(15)
+    expect(Math.max(...subsidies)).toBeLessThanOrEqual(30)
+    expect(Math.min(...subsidies)).toBeLessThanOrEqual(18)
+    expect(Math.max(...subsidies)).toBeGreaterThanOrEqual(18)
+  })
+})

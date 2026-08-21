@@ -42,7 +42,7 @@ const scoreFor = (
   noise: number,
 ) =>
   clamp(
-    Math.round(112 - burden * 118 - (size - 1) * 2.4 - STABILITY_PENALTY[stability] + noise),
+    Math.round(118 - burden * 95 - (size - 1) * 1.8 - STABILITY_PENALTY[stability] + noise),
     0,
     100,
   )
@@ -97,13 +97,13 @@ const generate = (): { households: Household[]; tierThresholds: TierThresholds }
       rentBurden,
       size,
       stability,
-      floatBetween(rng, -6, 6),
+      floatBetween(rng, -5, 5),
     )
 
     const riskProbability = Number(
-      clamp(0.04 + ((100 - affordabilityScore) / 100) * 0.94, 0, 1).toFixed(2),
+      clamp(0.03 + (78 - affordabilityScore) / 36, 0.03, 0.97).toFixed(2),
     )
-    const currentSubsidy = Math.round(clamp((100 - affordabilityScore) * 0.28, 0, 30))
+    const currentSubsidy = Math.round(clamp((77 - affordabilityScore) * 0.9, 0, 30))
     const recommendedSubsidy = Math.round(
       clamp(currentSubsidy + riskProbability * 12, currentSubsidy, 45),
     )
@@ -143,30 +143,23 @@ const generate = (): { households: Household[]; tierThresholds: TierThresholds }
     rows[index] = hero
   }
 
-  // Percentile cut. Ties are broken by id so the assignment is deterministic.
-  // Hero tiers are authored, so the heroes are excluded from the ranking and
-  // subtracted from the targets the generated rows have left to fill. The
-  // population totals therefore still land exactly on the brief's figures.
-  const heroIds = new Set(heroHouseholds.map((hero) => hero.id))
-  const heroHighRisk = heroHouseholds.filter((hero) => hero.tier === 'high-risk').length
-  const heroVulnerable = heroHouseholds.filter((hero) => hero.tier !== 'stable').length
-  const highRiskCut = TARGET_HIGH_RISK - heroHighRisk
-  const vulnerableCut = TARGET_VULNERABLE - heroVulnerable
-
-  const ranked = rows
-    .filter((household) => !heroIds.has(household.id))
-    .sort((a, b) => a.affordabilityScore - b.affordabilityScore || a.id - b.id)
+  // Percentile cut over the whole population. Ties break by id so the assignment
+  // is deterministic. Heroes are ranked with everyone else: their authored scores
+  // place them correctly, so no exclusion is needed.
+  const ranked = [...rows].sort(
+    (a, b) => a.affordabilityScore - b.affordabilityScore || a.id - b.id,
+  )
   ranked.forEach((household, rank) => {
-    if (rank < highRiskCut) household.tier = 'high-risk'
-    else if (rank < vulnerableCut) household.tier = 'emerging'
+    if (rank < TARGET_HIGH_RISK) household.tier = 'high-risk'
+    else if (rank < TARGET_VULNERABLE) household.tier = 'emerging'
     else household.tier = 'stable'
   })
 
   return {
     households: rows,
     tierThresholds: {
-      highRiskBelow: ranked[highRiskCut].affordabilityScore,
-      emergingBelow: ranked[vulnerableCut].affordabilityScore,
+      highRiskBelow: ranked[TARGET_HIGH_RISK].affordabilityScore,
+      emergingBelow: ranked[TARGET_VULNERABLE].affordabilityScore,
     },
   }
 }
