@@ -17,10 +17,12 @@ import type { Product } from '@/affordai/data/types'
  *   program's subsidy percentages. A verified market price does not make the
  *   subsidised price verified.
  *
- * BLS units, for the Market Prices page: milk is per gallon (U.S. city
- * average), eggs per dozen (U.S. city average), rice per pound (West region).
- * The simulated rows carry no unit because no quantity was ever defined for
- * them.
+ * UNITS. Every row carries a `unit`, because the reported prices do not share
+ * one: milk is per gallon (U.S. city average), eggs per dozen (U.S. city
+ * average), rice per pound (West region). Those three units come from the BLS
+ * series definitions. The five simulated rows had no quantity defined at all, so
+ * a plausible retail pack size is stated for each — chosen here, not sourced,
+ * which is exactly what their `simulated` tier already says about the price.
  */
 
 /**
@@ -33,7 +35,10 @@ const RECOMMENDED_SUBSIDY_SHARE = 0.27
 const subsidised = (marketPrice: number, share: number) =>
   Number((marketPrice * (1 - share)).toFixed(2))
 
-type MarketRow = Pick<Product, 'id' | 'label' | 'category' | 'marketPrice' | 'tier'>
+type MarketRow = Pick<
+  Product,
+  'id' | 'label' | 'category' | 'unit' | 'marketPrice' | 'tier'
+>
 
 const priced = (row: MarketRow): Product => ({
   ...row,
@@ -44,19 +49,76 @@ const priced = (row: MarketRow): Product => ({
 const MARKET_ROWS: MarketRow[] = [
   // Source: BLS average price series APU0000709112, June 2026. Not
   // independently retrieved — see sources.ts.
-  { id: 'milk', label: 'Milk', category: 'Dairy', marketPrice: 4.32, tier: 'reported' },
+  {
+    id: 'milk',
+    label: 'Milk',
+    category: 'Dairy',
+    unit: 'per gallon',
+    marketPrice: 4.32,
+    tier: 'reported',
+  },
   // Source: BLS average price series APU0000708111, June 2026. Not
   // independently retrieved.
-  { id: 'eggs', label: 'Eggs', category: 'Protein', marketPrice: 2.14, tier: 'reported' },
+  {
+    id: 'eggs',
+    label: 'Eggs',
+    category: 'Protein',
+    unit: 'per dozen',
+    marketPrice: 2.14,
+    tier: 'reported',
+  },
   // Source: BLS average price series APU0400701312, West region, April 2025.
   // Not independently retrieved.
-  { id: 'rice', label: 'Rice', category: 'Grains', marketPrice: 0.879, tier: 'reported' },
-  // No source consulted for the rows below: illustrative prices from the brief.
-  { id: 'cheese', label: 'Cheese', category: 'Dairy', marketPrice: 7.4, tier: 'simulated' },
-  { id: 'chicken', label: 'Chicken', category: 'Protein', marketPrice: 11.8, tier: 'simulated' },
-  { id: 'beans', label: 'Beans', category: 'Grains', marketPrice: 5.6, tier: 'simulated' },
-  { id: 'potatoes', label: 'Potatoes', category: 'Produce', marketPrice: 4.9, tier: 'simulated' },
-  { id: 'apples', label: 'Apples', category: 'Produce', marketPrice: 6.7, tier: 'simulated' },
+  {
+    id: 'rice',
+    label: 'Rice',
+    category: 'Grains',
+    unit: 'per pound',
+    marketPrice: 0.879,
+    tier: 'reported',
+  },
+  // No source consulted for the rows below: illustrative prices from the brief,
+  // with a plausible retail pack size chosen here so the price has a quantity.
+  {
+    id: 'cheese',
+    label: 'Cheese',
+    category: 'Dairy',
+    unit: 'per pound',
+    marketPrice: 7.4,
+    tier: 'simulated',
+  },
+  {
+    id: 'chicken',
+    label: 'Chicken',
+    category: 'Protein',
+    unit: 'per 4 lb bird',
+    marketPrice: 11.8,
+    tier: 'simulated',
+  },
+  {
+    id: 'beans',
+    label: 'Beans',
+    category: 'Grains',
+    unit: 'per 4 lb bag',
+    marketPrice: 5.6,
+    tier: 'simulated',
+  },
+  {
+    id: 'potatoes',
+    label: 'Potatoes',
+    category: 'Produce',
+    unit: 'per 5 lb bag',
+    marketPrice: 4.9,
+    tier: 'simulated',
+  },
+  {
+    id: 'apples',
+    label: 'Apples',
+    category: 'Produce',
+    unit: 'per 3 lb bag',
+    marketPrice: 6.7,
+    tier: 'simulated',
+  },
 ]
 
 export const PRODUCTS: Product[] = MARKET_ROWS.map(priced)

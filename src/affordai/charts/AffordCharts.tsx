@@ -163,15 +163,26 @@ export const BeforeAfterChart = ({
   </ResponsiveContainer>
 )
 
+/**
+ * The household ledger. Twenty-four monthly points, so ticks are thinned to
+ * every third month and per-point dots are dropped — at this density they
+ * merge into a band and hide the trend the chart exists to show.
+ */
 export const ScoreTimelineChart = ({
   data,
 }: {
-  data: { year: string; income: number; rent: number; score: number }[]
+  data: { label: string; income: number; rent: number; score: number }[]
 }) => (
   <ResponsiveContainer width="100%" height="100%">
     <LineChart data={data} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
       <CartesianGrid stroke={GRID_COLOR} vertical={false} />
-      <XAxis dataKey="year" tick={TICK_STYLE} axisLine={false} tickLine={false} />
+      <XAxis
+        dataKey="label"
+        tick={TICK_STYLE}
+        axisLine={false}
+        tickLine={false}
+        interval={2}
+      />
       <YAxis yAxisId="money" tick={TICK_STYLE} axisLine={false} tickLine={false} />
       <YAxis
         yAxisId="score"
@@ -189,7 +200,8 @@ export const ScoreTimelineChart = ({
         name="Monthly income"
         stroke={AFFORD_CHART_COLORS.stable}
         strokeWidth={2}
-        dot={{ r: 4 }}
+        dot={false}
+        activeDot={{ r: 4 }}
       />
       <Line
         yAxisId="money"
@@ -198,7 +210,8 @@ export const ScoreTimelineChart = ({
         name="Monthly rent"
         stroke={AFFORD_CHART_COLORS.emerging}
         strokeWidth={2}
-        dot={{ r: 4 }}
+        dot={false}
+        activeDot={{ r: 4 }}
       />
       <Line
         yAxisId="score"
@@ -207,7 +220,8 @@ export const ScoreTimelineChart = ({
         name="Affordability score"
         stroke={AFFORD_CHART_COLORS.highRisk}
         strokeWidth={2}
-        dot={{ r: 4 }}
+        dot={false}
+        activeDot={{ r: 4 }}
       />
     </LineChart>
   </ResponsiveContainer>

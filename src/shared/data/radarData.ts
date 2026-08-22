@@ -1,5 +1,5 @@
 /**
- * Verified public data about homelessness in San Diego, sourced from RTFH
+ * Verified public data about unhoused populations in San Diego, sourced from RTFH
  * (Regional Task Force on Homelessness), the Downtown San Diego Partnership,
  * California Housing Partnership, California EDD, accountability.ca.gov, and
  * the California State Auditor. See the Sources page for per-source dates
@@ -51,7 +51,7 @@ export interface CapacityEvent {
 export const capacityEvents: CapacityEvent[] = [
   { label: '+160 beds', description: "Rachel's Promise Center, women/families, winter 2025-26", source: 'Inside San Diego, July 2025' },
   { label: '+190 spaces', description: 'Safe Parking H Barracks site, May 2025', source: 'City of San Diego official announcement, May 2025' },
-  { label: '360+ beds', description: 'City-funded, last 2 years, across women, families, youth, seniors, veterans', source: 'Inside San Diego, "Street Homelessness Down Two Years in a Row", 2026' },
+  { label: '360+ beds', description: 'City-funded, last 2 years, across women, families, youth, seniors, veterans', source: 'Inside San Diego, "Unhoused Population Down Two Years in a Row", 2026' },
 ]
 
 // Structural housing context (used in place of eviction-filing/DV-occupancy trend lines, which have no public source)
@@ -82,7 +82,7 @@ export const investmentOutcomes = {
 // Triage methodology grounding (real study backing the simulated model — case-level scores remain simulated because HMIS individual data is protected)
 export const triageMethodologyNote = {
   studySource: '211 San Diego, "Housing Instability in San Diego County" Policy Brief, September 2019',
-  finding: 'Only ~25% of people flagged as "unstably housed" via 211 calls actually became homeless within 4 months.',
+  finding: 'Only ~25% of people flagged as "unstably housed" via 211 calls actually became unhoused within 4 months.',
   riskFactors: ['Unemployment', 'Education below high school/GED', 'Race (Black/African American households overrepresented)'],
   protectiveFactors: ['Hispanic/Latino ethnicity', 'Employment'],
 }

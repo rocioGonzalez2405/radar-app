@@ -92,7 +92,7 @@ export const seedProjects: Project[] = [
     orgName: 'Downtown Family Shelter Fund',
     title: 'Keep Downtown Families Off the Street',
     description:
-      "Emergency shelter, childcare, and rapid rehousing so women and their children downtown don't fall into street homelessness while they wait for a permanent bed.",
+      "Emergency shelter, childcare, and rapid rehousing so women and their children downtown don't become unhoused while they wait for a permanent bed.",
     supportTypes: ['money'],
     imageUrl: 'https://picsum.photos/seed/proj-1-shelter/640/360',
     date: '2026-08-25',
@@ -154,7 +154,7 @@ export const seedProjects: Project[] = [
     orgName: 'Downtown Community Health Van',
     title: 'Mobile Health Van — Volunteer Clinicians',
     description:
-      'Nurses, EMTs, and physicians staff a weekly mobile clinic for people experiencing homelessness, screening for urgent conditions before they become ER visits.',
+      'Nurses, EMTs, and physicians staff a weekly mobile clinic for unhoused people, screening for urgent conditions before they become ER visits.',
     supportTypes: ['medical', 'volunteer'],
     imageUrl: 'https://picsum.photos/seed/proj-5-healthvan/640/360',
     date: '2026-08-26',

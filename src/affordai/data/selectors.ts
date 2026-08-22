@@ -8,7 +8,11 @@ import type {
   AreaId,
   CostBurdenBand,
   Household,
+  IncomeBandBreakdown,
   OverviewKpis,
+  RiskBandComparison,
+  SizeCohort,
+  SubsidyAllocation,
   Tier,
   TimeRange,
   VulnerabilityPoint,
@@ -18,6 +22,8 @@ import { FORECAST } from '@/affordai/data/forecast'
 import { IMPACT } from '@/affordai/data/impact'
 import { PRODUCTS } from '@/affordai/data/products'
 import { RECOMMENDATIONS } from '@/affordai/data/recommendations'
+import { DEMO_POLICY } from '@/affordai/model/subsidyEngine'
+import type { SubsidyBand } from '@/affordai/model/subsidyEngine'
 import type {
   Forecast,
   ImpactMetrics,
@@ -52,9 +58,11 @@ const mean = (values: number[]) =>
  * `subsidyAllocations` cannot drift from `kpis`.
  *
  * Retuned from 6.24 to 6.1 in Task 6b, because regrounding the area constants
- * on the verified county rent shifted the subsidy curve.
+ * on the verified county rent shifted the subsidy curve. Retuned again to 6.18
+ * when the generator gained monthly ledgers: the extra draws moved the seeded
+ * sequence, so the same seed now yields a different population.
  */
-export const SUBSIDY_DOLLARS_PER_POINT = 6.1
+export const SUBSIDY_DOLLARS_PER_POINT = 6.18
 
 export const kpis = (): OverviewKpis => {
   const counts = tierCounts()
@@ -144,8 +152,17 @@ export const DEFAULT_QUERY: HouseholdQuery = {
   area: 'all',
   tier: 'all',
   incomeBand: 'all',
-  sortBy: 'affordabilityScore',
-  sortDir: 'asc',
+  // Opens on who the MODEL considers most at risk, descending.
+  //
+  // Sorting by affordabilityScore ascending — the obvious-looking default — was
+  // a real defect: `scoreFor` subtracts (size - 1) * 1.8, so household size is
+  // baked into the score and sorting by it sorts by size. Page one came back
+  // 25 of 25 households with five or more people, and the console's first
+  // impression became "this program serves large families", which is an
+  // artifact of a sort order and not a finding. A subsidy console has to open
+  // on who needs help, and that is the model's answer, not a descriptive index.
+  sortBy: 'riskProbability',
+  sortDir: 'desc',
   page: 1,
   pageSize: 25,
 }
@@ -210,3 +227,101 @@ export const costBurdenBands = (): CostBurdenBand[] => COST_BURDEN_BANDS
 
 /** Provenance for every figure in the console, grouped by tier on the page. */
 export const sources = (): AffordSource[] => AFFORD_SOURCES
+
+const BAND_EDGES: { band: string; min: number; max: number }[] = [
+  { band: 'Under $3,000', min: 0, max: 3000 },
+  { band: '$3,000 – $5,000', min: 3000, max: 5000 },
+  { band: '$5,000 – $7,000', min: 5000, max: 7000 },
+  { band: 'Over $7,000', min: 7000, max: Number.POSITIVE_INFINITY },
+]
+
+export const vulnerabilityByIncomeBand = (): IncomeBandBreakdown[] =>
+  BAND_EDGES.map((edge) => {
+    const rows = households.filter(
+      (household) =>
+        household.monthlyIncome >= edge.min && household.monthlyIncome < edge.max,
+    )
+    const vulnerable = rows.filter((household) => household.tier !== 'stable').length
+    return {
+      band: edge.band,
+      households: rows.length,
+      vulnerable,
+      rate: rows.length === 0 ? 0 : Number(((vulnerable / rows.length) * 100).toFixed(1)),
+    }
+  })
+
+/**
+ * The band that pays the most, found by percentage rather than by position.
+ *
+ * `DEMO_POLICY.bands` is documented as ordered high to low, but "the top band"
+ * has to survive somebody reordering that array, and every count below is
+ * measured against this band's threshold.
+ */
+export const topSubsidyBand = (): SubsidyBand =>
+  DEMO_POLICY.bands.reduce((highest, band) =>
+    band.percent > highest.percent ? band : highest,
+  )
+
+/**
+ * Measures both of the console's "high risk" populations rather than asserting
+ * either. The two definitions are independent and their counts move with the
+ * model, so nothing that reads this may cache a number from it.
+ */
+export const topBandVersusTier = (): RiskBandComparison => {
+  const band = topSubsidyBand()
+  const inBand = households.filter(
+    (household) => household.riskProbability >= band.minRisk,
+  )
+  return {
+    minRisk: band.minRisk,
+    bandPercent: band.percent,
+    inBand: inBand.length,
+    inTier: tierCounts()['high-risk'],
+    inBoth: inBand.filter((household) => household.tier === 'high-risk').length,
+    population: HOUSEHOLD_COUNT,
+  }
+}
+
+/**
+ * Household size against the model's top band, one cohort per size.
+ *
+ * The model does not weight size — it is an audit-only feature — so this is the
+ * check that says whether dropping its coefficient actually changed who reaches
+ * the paid band, measured rather than claimed.
+ */
+export const topBandBySize = (): SizeCohort[] => {
+  const band = topSubsidyBand()
+  const sizes = [...new Set(households.map((household) => household.size))].sort(
+    (a, b) => a - b,
+  )
+
+  return sizes.map((size) => {
+    const rows = households.filter((household) => household.size === size)
+    return {
+      size,
+      households: rows.length,
+      inTopBand: rows.filter(
+        (household) => household.riskProbability >= band.minRisk,
+      ).length,
+      maxRisk: Math.max(...rows.map((household) => household.riskProbability)),
+    }
+  })
+}
+
+/** Allocation covers the vulnerable population only — stable households are not subsidised. */
+export const subsidyAllocations = (): SubsidyAllocation[] =>
+  AREAS.map((area) => {
+    const rows = households.filter(
+      (household) => household.area === area.id && household.tier !== 'stable',
+    )
+    const averageSubsidy = mean(rows.map((row) => row.currentSubsidy))
+    return {
+      areaId: area.id,
+      areaLabel: area.label,
+      households: rows.length,
+      averageSubsidy: Number(averageSubsidy.toFixed(1)),
+      // Scaled by the shared constant, never a literal: it has already been
+      // retuned twice, and `kpis` reads the same value so the two cannot drift.
+      monthlyCost: Math.round(rows.length * averageSubsidy * SUBSIDY_DOLLARS_PER_POINT),
+    }
+  })

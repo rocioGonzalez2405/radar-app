@@ -6,10 +6,22 @@ export type EmploymentStability = 'High' | 'Medium' | 'Low'
 
 export type TimeRange = '30d' | '90d' | '6m' | '1y'
 
-export interface HouseholdYear {
-  year: number
+/**
+ * One month of a household's ledger. The risk model reads trends, not snapshots
+ * — a household can still have income while its income falls, its rent climbs,
+ * and its balance turns negative — so history is monthly, not annual.
+ *
+ * Ordered oldest to newest. The last entry is always the household's present.
+ */
+export interface HouseholdMonth {
+  /** Calendar month, `YYYY-MM`. */
+  month: string
   income: number
   rent: number
+  /** Food, utilities, transport, medicine and basic schooling combined. */
+  essentials: number
+  /** `income - rent - essentials`. Negative means the month did not balance. */
+  balance: number
   affordabilityScore: number
 }
 
@@ -25,8 +37,10 @@ export interface Household {
   affordabilityScore: number
   rentBurden: number
   tier: Tier
+  /** Model output. Probability of entering vulnerability inside the horizon. */
   riskProbability: number
-  history: HouseholdYear[]
+  /** Twenty-four months, oldest first. The last entry is the present. */
+  history: HouseholdMonth[]
 }
 
 export interface Area {
@@ -95,6 +109,16 @@ export interface Product {
   id: string
   label: string
   category: ProductCategory
+  /**
+   * The quantity every price on this row is measured against, e.g. `per gallon`.
+   *
+   * Required, and required for a reason: the reported rows come from BLS average
+   * price series whose units disagree with one another — rice is per pound,
+   * eggs per dozen — so a price column without the quantity on every row is not
+   * a comparison, it is a category error. Rendered beside the label, never
+   * inside a price cell.
+   */
+  unit: string
   marketPrice: number
   currentPrice: number
   recommendedPrice: number
@@ -139,7 +163,7 @@ export interface HouseholdQuery {
   area: AreaId | 'all'
   tier: Tier | 'all'
   incomeBand: 'all' | 'under-3000' | '3000-5000' | '5000-7000' | 'over-7000'
-  sortBy: 'id' | 'affordabilityScore' | 'rentBurden' | 'monthlyIncome'
+  sortBy: 'id' | 'riskProbability' | 'affordabilityScore' | 'rentBurden' | 'monthlyIncome'
   sortDir: 'asc' | 'desc'
   page: number
   pageSize: number
@@ -185,4 +209,53 @@ export interface CostBurdenBand {
   band: string
   costBurdened: number
   severelyCostBurdened: number
+}
+
+/** Vulnerability rate per monthly-income band, over the simulated population. */
+export interface IncomeBandBreakdown {
+  band: string
+  households: number
+  vulnerable: number
+  rate: number
+}
+
+/**
+ * The two different notions of "high risk" this console carries, side by side.
+ *
+ * `inTier` is a capacity-based percentile cut over the descriptive affordability
+ * score — a fixed number of places in a program. `inBand` is the model's own
+ * probability clearing the top-paying band's threshold. They answer different
+ * questions and will not agree, which is the point of showing both.
+ */
+export interface RiskBandComparison {
+  /** The top band's inclusive lower bound on model probability. */
+  minRisk: number
+  /** What the top band pays. */
+  bandPercent: number
+  inBand: number
+  inTier: number
+  inBoth: number
+  population: number
+}
+
+/**
+ * One household-size cohort. Household size is an AUDIT-ONLY variable: the model
+ * never weights it, so this is how its influence gets checked rather than
+ * assumed.
+ */
+export interface SizeCohort {
+  size: number
+  households: number
+  inTopBand: number
+  /** The highest probability the model assigns anyone in this cohort. */
+  maxRisk: number
+}
+
+/** Subsidy spend for one area, covering its vulnerable households only. */
+export interface SubsidyAllocation {
+  areaId: AreaId
+  areaLabel: string
+  households: number
+  averageSubsidy: number
+  monthlyCost: number
 }
