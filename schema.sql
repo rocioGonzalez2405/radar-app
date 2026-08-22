@@ -1,6 +1,6 @@
 -- Buy Nothing Marketplace Database Schema
 -- PostgreSQL tables for nonprofit resource exchange system
--- Integrated with Radar homelessness decision-support dashboard
+-- Integrated with Radar unhoused decision-support dashboard
 
 -- ============================================================================
 -- NONPROFIT PROFILES
@@ -103,9 +103,6 @@ CREATE TABLE matches (
   -- Radar integration
   radar_signal VARCHAR(100), -- e.g., 'age_55_plus_rising', 'housing_pressure'
 
-  -- Transaction reference
-  transaction_id UUID REFERENCES transactions(id),
-
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMP
@@ -125,7 +122,7 @@ CREATE INDEX idx_matches_radar ON matches(radar_signal);
 
 CREATE TABLE transactions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  match_id UUID NOT NULL REFERENCES matches(id) ON DELETE RESTRICT,
+  match_id UUID REFERENCES matches(id) ON DELETE SET NULL,
   from_nonprofit_id UUID NOT NULL REFERENCES nonprofits(id) ON DELETE RESTRICT,
   to_nonprofit_id UUID NOT NULL REFERENCES nonprofits(id) ON DELETE RESTRICT,
   status VARCHAR(20) NOT NULL DEFAULT 'executing', -- MatchStatus enum
@@ -199,6 +196,12 @@ CREATE TABLE match_rejections (
 
 CREATE INDEX idx_rejections_match ON match_rejections(match_id);
 CREATE INDEX idx_rejections_nonprofit ON match_rejections(rejected_by_nonprofit_id);
+
+-- ============================================================================
+-- ADD TRANSACTION REFERENCE TO MATCHES (after transactions table exists)
+-- ============================================================================
+
+ALTER TABLE matches ADD COLUMN transaction_id UUID REFERENCES transactions(id) ON DELETE SET NULL;
 
 -- ============================================================================
 -- DISPUTE TRACKING (For Phase 2)
@@ -292,3 +295,76 @@ JOIN nonprofits fnp ON m.from_nonprofit_id = fnp.id
 JOIN nonprofits tnp ON m.to_nonprofit_id = tnp.id
 WHERE m.status IN ('proposed', 'negotiated', 'accepted')
   AND m.deleted_at IS NULL;
+
+-- ============================================================================
+-- SEED DATA FOR TESTING
+-- ============================================================================
+
+INSERT INTO nonprofits (legal_name, operating_name, primary_services, demographics, service_area_zip_codes, bed_capacity, utilization_rate, ftes_count, reputation_score, completed_exchanges, is_active)
+VALUES
+('Regional Task Force on Homelessness', 'RTFH Downtown Services', ARRAY['emergency_shelter', 'case_management', 'mental_health_services'], ARRAY['single_adult', 'chronically_unhoused'], ARRAY['92101', '92102', '92103', '92104'], 85, 0.94, 28, 89, 47, true),
+('Father Joe''s Villages', 'Father Joe''s Downtown Shelter', ARRAY['emergency_shelter', 'transitional_housing', 'meals'], ARRAY['single_adult', 'family_with_children'], ARRAY['92101', '92102', '92110'], 120, 0.96, 45, 92, 63, true),
+('San Diego Housing Commission', 'Rapid Rehousing Program', ARRAY['permanent_supportive_housing', 'case_management', 'job_training'], ARRAY['family_with_children', 'veteran'], ARRAY['92101', '92103', '92110', '92109'], 45, 0.88, 18, 85, 34, true),
+('Veterans Village of San Diego', 'Veterans Housing Initiative', ARRAY['permanent_supportive_housing', 'veteran_mental_health', 'job_training'], ARRAY['veteran'], ARRAY['92104', '92105', '92111'], 78, 0.91, 22, 87, 41, true),
+('Serve San Diego', 'Community Outreach Program', ARRAY['case_management', 'meals', 'hygiene_facilities'], ARRAY['single_adult', 'age_55_plus'], ARRAY['92101', '92102', '92103', '92104', '92105'], 0, 0.00, 8, 81, 25, true),
+('Lifepath Integrated Health Services', 'Mental Health & Housing', ARRAY['mental_health_services', 'substance_abuse_treatment', 'medical_clinic'], ARRAY['single_adult', 'chronically_unhoused'], ARRAY['92101', '92103', '92110'], 30, 0.89, 14, 83, 28, true),
+('San Diego Youth Services', 'Youth Emergency Services', ARRAY['emergency_shelter', 'job_training', 'mental_health_services'], ARRAY['unaccompanied_minor', 'age_18_24'], ARRAY['92101', '92102', '92104'], 40, 0.78, 12, 80, 19, true),
+('Senior Community Centers', 'Golden Years Housing', ARRAY['permanent_supportive_housing', 'geriatric_care', 'meals', 'chronic_disease_mgmt'], ARRAY['age_55_plus'], ARRAY['92109', '92110', '92111', '92114'], 56, 0.93, 16, 84, 31, true),
+('Jewish Family Service San Diego', 'Emergency Assistance Program', ARRAY['emergency_shelter', 'case_management', 'family_counseling'], ARRAY['family_with_children'], ARRAY['92102', '92103', '92105'], 25, 0.82, 9, 82, 16, true),
+('Chicanos Por La Causa', 'Housing & Employment Center', ARRAY['transitional_housing', 'job_training', 'case_management'], ARRAY['single_adult', 'family_with_children'], ARRAY['92101', '92102', '92105'], 35, 0.86, 11, 79, 22, true);
+
+-- Add inventory for each nonprofit
+INSERT INTO inventory_items (nonprofit_id, service_type, quantity, quantity_unit, description, demographics, available_from, available_until, is_available)
+SELECT id, 'emergency_shelter', 15, 'beds', 'Emergency shelter beds - singles', ARRAY['single_adult'], NOW(), NOW() + INTERVAL '90 days', true FROM nonprofits WHERE operating_name = 'RTFH Downtown Services' LIMIT 1;
+
+INSERT INTO inventory_items (nonprofit_id, service_type, quantity, quantity_unit, description, demographics, available_from, available_until, is_available)
+SELECT id, 'meals', 300, 'meals', 'Hot meals daily service', ARRAY['single_adult', 'chronically_unhoused'], NOW(), NOW() + INTERVAL '30 days', true FROM nonprofits WHERE operating_name = 'RTFH Downtown Services' LIMIT 1;
+
+INSERT INTO inventory_items (nonprofit_id, service_type, quantity, quantity_unit, description, demographics, available_from, available_until, is_available)
+SELECT id, 'emergency_shelter', 25, 'beds', 'Emergency shelter for families', ARRAY['family_with_children'], NOW(), NOW() + INTERVAL '90 days', true FROM nonprofits WHERE operating_name = 'Father Joe''s Downtown Shelter' LIMIT 1;
+
+INSERT INTO inventory_items (nonprofit_id, service_type, quantity, quantity_unit, description, demographics, available_from, available_until, is_available)
+SELECT id, 'transitional_housing', 8, 'units', 'Transitional housing spaces', ARRAY['family_with_children'], NOW(), NOW() + INTERVAL '180 days', true FROM nonprofits WHERE operating_name = 'Father Joe''s Downtown Shelter' LIMIT 1;
+
+INSERT INTO inventory_items (nonprofit_id, service_type, quantity, quantity_unit, description, demographics, available_from, available_until, is_available)
+SELECT id, 'permanent_supportive_housing', 5, 'units', 'PSH units with wraparound services', ARRAY['chronically_unhoused'], NOW(), NOW() + INTERVAL '365 days', true FROM nonprofits WHERE operating_name = 'San Diego Housing Commission' LIMIT 1;
+
+INSERT INTO inventory_items (nonprofit_id, service_type, quantity, quantity_unit, description, demographics, available_from, available_until, is_available)
+SELECT id, 'job_training', 12, 'slots', 'Job training & employment services', ARRAY['single_adult', 'age_18_24'], NOW(), NOW() + INTERVAL '60 days', true FROM nonprofits WHERE operating_name = 'San Diego Housing Commission' LIMIT 1;
+
+INSERT INTO inventory_items (nonprofit_id, service_type, quantity, quantity_unit, description, demographics, available_from, available_until, is_available)
+SELECT id, 'permanent_supportive_housing', 10, 'units', 'Veteran housing with mental health support', ARRAY['veteran'], NOW(), NOW() + INTERVAL '180 days', true FROM nonprofits WHERE operating_name = 'Veterans Housing Initiative' LIMIT 1;
+
+INSERT INTO inventory_items (nonprofit_id, service_type, quantity, quantity_unit, description, demographics, available_from, available_until, is_available)
+SELECT id, 'mental_health_services', 20, 'slots', 'Individual counseling sessions', ARRAY['single_adult'], NOW(), NOW() + INTERVAL '45 days', true FROM nonprofits WHERE operating_name = 'Mental Health & Housing' LIMIT 1;
+
+INSERT INTO inventory_items (nonprofit_id, service_type, quantity, quantity_unit, description, demographics, available_from, available_until, is_available)
+SELECT id, 'medical_clinic', 8, 'hours', 'Weekly mobile medical clinic', ARRAY['chronically_unhoused', 'age_55_plus'], NOW(), NOW() + INTERVAL '30 days', true FROM nonprofits WHERE operating_name = 'Mental Health & Housing' LIMIT 1;
+
+INSERT INTO inventory_items (nonprofit_id, service_type, quantity, quantity_unit, description, demographics, available_from, available_until, is_available)
+SELECT id, 'emergency_shelter', 12, 'beds', 'Youth emergency shelter', ARRAY['unaccompanied_minor', 'age_18_24'], NOW(), NOW() + INTERVAL '90 days', true FROM nonprofits WHERE operating_name = 'Youth Emergency Services' LIMIT 1;
+
+INSERT INTO inventory_items (nonprofit_id, service_type, quantity, quantity_unit, description, demographics, available_from, available_until, is_available)
+SELECT id, 'geriatric_care', 6, 'units', 'Senior supportive housing', ARRAY['age_55_plus'], NOW(), NOW() + INTERVAL '365 days', true FROM nonprofits WHERE operating_name = 'Golden Years Housing' LIMIT 1;
+
+INSERT INTO inventory_items (nonprofit_id, service_type, quantity, quantity_unit, description, demographics, available_from, available_until, is_available)
+SELECT id, 'meals', 250, 'meals', 'Senior meal service', ARRAY['age_55_plus'], NOW(), NOW() + INTERVAL '30 days', true FROM nonprofits WHERE operating_name = 'Golden Years Housing' LIMIT 1;
+
+-- Add needs for cross-org matching
+INSERT INTO needs (nonprofit_id, service_type, quantity, quantity_unit, urgency, deadline, demographics, fairness_criteria, is_open)
+SELECT id, 'meals', 500, 'meals', 'high', NOW() + INTERVAL '14 days', ARRAY['single_adult'], 'Support high-utilization orgs; prioritize age 55+ rising demographic', true FROM nonprofits WHERE operating_name = 'RTFH Downtown Services' LIMIT 1;
+
+INSERT INTO needs (nonprofit_id, service_type, quantity, quantity_unit, urgency, deadline, demographics, fairness_criteria, is_open)
+SELECT id, 'mental_health_services', 8, 'slots', 'critical', NOW() + INTERVAL '7 days', ARRAY['single_adult'], 'Prioritize orgs serving chronically unhoused', true FROM nonprofits WHERE operating_name = 'Father Joe''s Downtown Shelter' LIMIT 1;
+
+INSERT INTO needs (nonprofit_id, service_type, quantity, quantity_unit, urgency, deadline, demographics, fairness_criteria, is_open)
+SELECT id, 'job_training', 6, 'slots', 'high', NOW() + INTERVAL '21 days', ARRAY['age_18_24'], 'Support youth serving nonprofits', true FROM nonprofits WHERE operating_name = 'Youth Emergency Services' LIMIT 1;
+
+INSERT INTO needs (nonprofit_id, service_type, quantity, quantity_unit, urgency, deadline, demographics, fairness_criteria, is_open)
+SELECT id, 'case_management', 10, 'slots', 'high', NOW() + INTERVAL '30 days', ARRAY['veteran'], 'Ensure veteran-focused support', true FROM nonprofits WHERE operating_name = 'Veterans Housing Initiative' LIMIT 1;
+
+INSERT INTO needs (nonprofit_id, service_type, quantity, quantity_unit, urgency, deadline, demographics, fairness_criteria, is_open)
+SELECT id, 'permanent_supportive_housing', 3, 'units', 'critical', NOW() + INTERVAL '10 days', ARRAY['family_with_children'], 'Prioritize families exiting shelter', true FROM nonprofits WHERE operating_name = 'San Diego Housing Commission' LIMIT 1;
+
+INSERT INTO needs (nonprofit_id, service_type, quantity, quantity_unit, urgency, deadline, demographics, fairness_criteria, is_open)
+SELECT id, 'medical_clinic', 4, 'slots', 'high', NOW() + INTERVAL '14 days', ARRAY['age_55_plus'], 'Priority to age 55+ demographic surge', true FROM nonprofits WHERE operating_name = 'Golden Years Housing' LIMIT 1;

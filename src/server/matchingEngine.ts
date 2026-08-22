@@ -203,7 +203,7 @@ const inferRadarSignal = (inventory: InventoryItem): string | undefined => {
   const { demographics, serviceType } = inventory
 
   // Check demographics
-  if (demographics.includes('age_55_plus')) {
+  if (demographics.includes('age_55_plus' as any)) {
     return 'age_55_plus_rising' // 29% → 33%
   }
 

@@ -24,6 +24,15 @@ import { PredictionsPage } from '@/affordai/pages/Predictions/PredictionsPage'
 import { ImpactPage } from '@/affordai/pages/Impact/ImpactPage'
 import { DataSourcesPage } from '@/affordai/pages/DataSources/DataSourcesPage'
 import { SettingsPage } from '@/affordai/pages/Settings/SettingsPage'
+import { NonprofitDashboardShell } from '@/layouts/NonprofitDashboardShell/NonprofitDashboardShell'
+import { DashboardPage } from '@/pages/NonprofitDashboard/Dashboard/DashboardPage'
+import { InventoryPage } from '@/pages/NonprofitDashboard/Inventory/InventoryPage'
+import { AddInventoryPage } from '@/pages/NonprofitDashboard/Inventory/AddInventoryPage'
+import { NeedsPage } from '@/pages/NonprofitDashboard/Needs/NeedsPage'
+import { PostNeedPage } from '@/pages/NonprofitDashboard/Needs/PostNeedPage'
+import { MatchesPage } from '@/pages/NonprofitDashboard/Matches/MatchesPage'
+import { TransactionsPage } from '@/pages/NonprofitDashboard/Transactions/TransactionsPage'
+import { ProfilePage } from '@/pages/NonprofitDashboard/Profile/ProfilePage'
 
 export const AppRoutes = () => (
   <Routes>
@@ -72,6 +81,17 @@ export const AppRoutes = () => (
         <Route path={ROUTE_PATTERNS.projectDetail} element={<ProjectDetailPage />} />
         <Route path={ROUTE_PATTERNS.projectVolunteer} element={<VolunteerSignupPage />} />
         <Route path={ROUTE_PATTERNS.projectLegalAid} element={<LegalAidIntakePage />} />
+      </Route>
+
+      <Route element={<NonprofitDashboardShell />}>
+        <Route path={ROUTES.nonprofitDashboard.dashboard} element={<DashboardPage />} />
+        <Route path={ROUTES.nonprofitDashboard.inventory} element={<InventoryPage />} />
+        <Route path={ROUTES.nonprofitDashboard.addInventory} element={<AddInventoryPage />} />
+        <Route path={ROUTES.nonprofitDashboard.needs} element={<NeedsPage />} />
+        <Route path={ROUTES.nonprofitDashboard.needsNew} element={<PostNeedPage />} />
+        <Route path={ROUTES.nonprofitDashboard.matches} element={<MatchesPage />} />
+        <Route path={ROUTES.nonprofitDashboard.transactions} element={<TransactionsPage />} />
+        <Route path={ROUTES.nonprofitDashboard.profile} element={<ProfilePage />} />
       </Route>
     </Route>
   </Routes>

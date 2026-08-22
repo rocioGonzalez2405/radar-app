@@ -5,7 +5,7 @@
  * Inventory items are timestamped and can be searched by service type, demographics, and location.
  */
 
-import { Express, Request, Response } from 'express'
+import type { Express, Request, Response } from 'express'
 import { pool } from '../index'
 import { InventoryItem, ServiceType, RTFHDemographic } from '../../shared/data/buyNothingData'
 import { v4 as uuidv4 } from 'uuid'
@@ -441,7 +441,7 @@ async function logAuditEntry(entry: {
 export default function setupInventoryRoutes(app: Express): void {
   app.post('/api/nonprofits/:nonprofitId/inventory', createInventory)
   app.get('/api/nonprofits/:nonprofitId/inventory', listInventoryForNonprofit)
-  app.get('/api/inventory/:id', getInventory)
   app.get('/api/inventory/search', searchInventory)
+  app.get('/api/inventory/:id', getInventory)
   app.delete('/api/inventory/:id', deleteInventory)
 }

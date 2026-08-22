@@ -7,7 +7,7 @@ import { usePortalLinks } from '@/pages/Portal/usePortalLinks'
 
 /**
  * Handles both `legal` project modes:
- * - `seeking-help`: a homeless individual (or the org on their behalf)
+ * - `seeking-help`: an unhoused individual (or the org on their behalf)
  *   requests pro-bono legal help. Collects contact info + case description.
  * - `offering-help`: a lawyer volunteers their time/skills. Collects
  *   contact info + availability/skills, same as a volunteer signup.

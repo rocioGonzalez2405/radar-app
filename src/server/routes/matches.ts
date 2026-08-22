@@ -6,11 +6,10 @@
  * Supports proposal, acceptance, rejection, and execution workflows.
  */
 
-import { Express, Request, Response } from 'express'
+import type { Express, Request, Response } from 'express'
 import { pool } from '../index'
 import { MatchStatus } from '../../shared/data/buyNothingData'
 import { calculateFairnessScore } from '../fairnessScoring'
-import { findMatchesForNeed, findMatchesForInventory } from '../matchingEngine'
 import { v4 as uuidv4 } from 'uuid'
 
 // ============================================================================
@@ -293,7 +292,7 @@ async function getMatch(req: Request, res: Response): Promise<void> {
  */
 async function proposeMatch(req: Request, res: Response): Promise<void> {
   try {
-    const { inventoryId, needId, proposalNote } = req.body as ProposeMatchRequest
+    const { inventoryId, needId } = req.body as ProposeMatchRequest
 
     if (!inventoryId || !needId) {
       res.status(400).json({ error: 'inventoryId and needId are required' })
@@ -482,7 +481,7 @@ async function proposeMatch(req: Request, res: Response): Promise<void> {
 async function acceptMatch(req: Request, res: Response): Promise<void> {
   try {
     const { id } = req.params
-    const { nonprofitId, note } = req.body as MatchActionRequest
+    const { nonprofitId } = req.body as MatchActionRequest
 
     if (!nonprofitId) {
       res.status(400).json({ error: 'nonprofitId is required' })
@@ -547,7 +546,7 @@ async function acceptMatch(req: Request, res: Response): Promise<void> {
 async function rejectMatch(req: Request, res: Response): Promise<void> {
   try {
     const { id } = req.params
-    const { nonprofitId, note } = req.body as MatchActionRequest
+    const { nonprofitId } = req.body as MatchActionRequest
 
     if (!nonprofitId) {
       res.status(400).json({ error: 'nonprofitId is required' })
@@ -594,7 +593,7 @@ async function rejectMatch(req: Request, res: Response): Promise<void> {
       rejectionId,
       id,
       nonprofitId,
-      note || null,
+      null,
       new Date(),
       new Date(),
     ])

@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: radar_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-radar}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_NAME:-radar_buy_nothing}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-radar}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - buy-nothing
+
+  # Buy Nothing Full Stack (Backend API + Frontend)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: buy_nothing_app
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-radar_buy_nothing}
+      DB_USER: ${DB_USER:-radar}
+      DB_PASSWORD: ${DB_PASSWORD:-password}
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./src:/app/src
+    networks:
+      - buy-nothing
+    restart: unless-stopped
+
+  # Optional: Separate Frontend Dev Server (hot-reload)
+  # Uncomment to run frontend separately with live reloading
+  # frontend:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.frontend
+  #   container_name: buy_nothing_frontend
+  #   ports:
+  #     - "5173:5173"
+  #   volumes:
+  #     - ./src:/app/src
+  #     - ./index.html:/app/index.html
+  #   networks:
+  #     - buy-nothing
+  #   environment:
+  #     - VITE_API_URL=http://localhost:3000
+
+volumes:
+  postgres_data:
+
+networks:
+  buy-nothing:
+    driver: bridge

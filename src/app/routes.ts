@@ -13,6 +13,18 @@ export const ROUTES = {
   portal: '/portal',
   portalNew: '/portal/new',
   projects: '/projects',
+  nonprofitDashboard: {
+    home: '/nonprofit-dashboard',
+    dashboard: '/nonprofit-dashboard',
+    inventory: '/nonprofit-dashboard/inventory',
+    inventoryNew: '/nonprofit-dashboard/inventory/add',
+    addInventory: '/nonprofit-dashboard/inventory/add',
+    needs: '/nonprofit-dashboard/needs',
+    needsNew: '/nonprofit-dashboard/needs/new',
+    matches: '/nonprofit-dashboard/matches',
+    transactions: '/nonprofit-dashboard/transactions',
+    profile: '/nonprofit-dashboard/profile',
+  },
   affordai: {
     overview: '/affordai',
     households: '/affordai/households',

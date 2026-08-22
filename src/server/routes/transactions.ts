@@ -5,7 +5,7 @@
  * Transactions are created from accepted matches and track outcomes.
  */
 
-import { Express, Request, Response } from 'express'
+import type { Express, Request, Response } from 'express'
 import { pool } from '../index'
 import { MatchStatus } from '../../shared/data/buyNothingData'
 import { v4 as uuidv4 } from 'uuid'
@@ -42,7 +42,7 @@ interface RateFairnessRequest {
  */
 async function createTransaction(req: Request, res: Response): Promise<void> {
   try {
-    const { matchId, executionNote } = req.body as CreateTransactionRequest
+    const { matchId } = req.body as CreateTransactionRequest
 
     if (!matchId) {
       res.status(400).json({ error: 'matchId is required' })
@@ -335,7 +335,7 @@ async function getTransaction(req: Request, res: Response): Promise<void> {
 async function updateTransaction(req: Request, res: Response): Promise<void> {
   try {
     const { id } = req.params
-    const { status, actualEndDate, peopleServed, notes } = req.body as UpdateTransactionRequest
+    const { status, actualEndDate, peopleServed } = req.body as UpdateTransactionRequest
 
     // Verify transaction exists
     const checkQuery = `SELECT * FROM transactions WHERE id = $1 AND deleted_at IS NULL`

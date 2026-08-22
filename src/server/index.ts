@@ -5,10 +5,12 @@
  * Runs all API endpoints for nonprofit resource exchange marketplace.
  */
 
-import express, { Express, Request, Response, NextFunction } from 'express'
+import express from 'express'
+import type { Express, Request, Response, NextFunction } from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
-import { Pool, QueryResult } from 'pg'
+import path from 'path'
+import { Pool } from 'pg'
 import { healthCheck } from './db'
 
 // Load environment variables
@@ -26,8 +28,13 @@ app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
+// Serve static frontend files (built React app)
+// Use process.cwd() for reliable path resolution at runtime
+const distPath = path.join(process.cwd(), 'dist')
+app.use(express.static(distPath))
+
 // Request logging middleware
-app.use((req: Request, res: Response, next: NextFunction) => {
+app.use((req: Request, _res: Response, next: NextFunction) => {
   const timestamp = new Date().toISOString()
   console.log(`[${timestamp}] ${req.method} ${req.path}`)
   next()
@@ -53,7 +60,7 @@ async function initializeDatabase(): Promise<void> {
 
   // Test connection
   try {
-    const result = await pool.query('SELECT NOW()')
+    await pool.query('SELECT NOW()')
     console.log('✅ Database connection successful')
     console.log(`   Connected to ${process.env.DB_NAME} at ${process.env.DB_HOST}`)
   } catch (error) {
@@ -67,7 +74,7 @@ async function initializeDatabase(): Promise<void> {
 // ============================================================================
 
 // Health check
-app.get('/health', async (req: Request, res: Response) => {
+app.get('/health', async (_req: Request, res: Response) => {
   try {
     const isHealthy = await healthCheck()
     res.json({
@@ -85,7 +92,7 @@ app.get('/health', async (req: Request, res: Response) => {
 })
 
 // API root
-app.get('/api', (req: Request, res: Response) => {
+app.get('/api', (_req: Request, res: Response) => {
   res.json({
     service: 'Buy Nothing Marketplace API',
     version: '1.0.0',
@@ -119,20 +126,24 @@ setupTransactionRoutes(app)
 setupAdminRoutes(app)
 
 // ============================================================================
-// ERROR HANDLING
+// ERROR HANDLING & SPA FALLBACK
 // ============================================================================
 
-// 404 handler
-app.use((req: Request, res: Response) => {
-  res.status(404).json({
-    error: 'Not found',
-    path: req.path,
-    method: req.method,
-  })
+// SPA fallback: route all non-API 404s to index.html for React Router
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (req.path.startsWith('/api')) {
+    res.status(404).json({
+      error: 'Not found',
+      path: req.path,
+      method: req.method,
+    })
+  } else {
+    res.sendFile(path.join(distPath, 'index.html'))
+  }
 })
 
 // Global error handler
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error('❌ Error:', err)
   res.status(500).json({
     error: 'Internal server error',
@@ -153,15 +164,16 @@ async function start(): Promise<void> {
     // Start listening
     app.listen(PORT, () => {
       console.log('')
-      console.log('🚀 Buy Nothing API Server')
-      console.log(`   Listening on http://localhost:${PORT}`)
-      console.log(`   Health check: http://localhost:${PORT}/health`)
-      console.log(`   API root: http://localhost:${PORT}/api`)
+      console.log('🚀 Buy Nothing Full Stack')
+      console.log(`   Frontend: http://localhost:${PORT}`)
+      console.log(`   API: http://localhost:${PORT}/api`)
+      console.log(`   Health: http://localhost:${PORT}/health`)
       console.log('')
       console.log('Environment:')
       console.log(`   NODE_ENV: ${process.env.NODE_ENV || 'development'}`)
       console.log(`   DB_HOST: ${process.env.DB_HOST || 'localhost'}`)
       console.log(`   DB_NAME: ${process.env.DB_NAME || 'radar_buy_nothing'}`)
+      console.log(`   Frontend path: ${distPath}`)
       console.log('')
     })
   } catch (error) {

@@ -5,7 +5,7 @@
  * Includes dashboard metrics, facilitation tools, audit logging, and Radar impact analysis.
  */
 
-import { Express, Request, Response } from 'express'
+import type { Express, Request, Response } from 'express'
 import { pool } from '../index'
 import { MatchStatus } from '../../shared/data/buyNothingData'
 

@@ -59,7 +59,7 @@ export const SimulatorPage = () => (
         </div>
         <p className="mt-2.5 text-[12.5px] leading-relaxed text-[#f3c67a]/90">
           The California State Auditor found that roughly one in three people
-          who exit a homelessness program in this region have no recorded
+          who exit an unhoused services program in this region have no recorded
           destination — meaning outcome data like "people housed" above is
           likely an undercount, and the true resolution rate is not fully
           known. This is not hidden or downplayed here on purpose: it's a

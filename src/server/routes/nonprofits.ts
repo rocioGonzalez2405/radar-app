@@ -5,9 +5,9 @@
  * These are the foundational endpoints that other systems depend on.
  */
 
-import { Express, Request, Response } from 'express'
+import type { Express, Request, Response } from 'express'
 import { pool } from '../index'
-import { Nonprofit, ServiceType, RTFHDemographic } from '../../shared/data/buyNothingData'
+import { ServiceType, RTFHDemographic } from '../../shared/data/buyNothingData'
 import { v4 as uuidv4 } from 'uuid'
 
 // ============================================================================

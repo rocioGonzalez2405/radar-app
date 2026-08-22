@@ -5,7 +5,7 @@
  * Needs include urgency levels and deadlines to prioritize matching.
  */
 
-import { Express, Request, Response } from 'express'
+import type { Express, Request, Response } from 'express'
 import { pool } from '../index'
 import { RTFHDemographic, UrgencyLevel } from '../../shared/data/buyNothingData'
 import { v4 as uuidv4 } from 'uuid'
@@ -434,7 +434,7 @@ async function logAuditEntry(entry: {
 export default function setupNeedsRoutes(app: Express): void {
   app.post('/api/nonprofits/:nonprofitId/needs', createNeed)
   app.get('/api/nonprofits/:nonprofitId/needs', listNeedsForNonprofit)
-  app.get('/api/needs/:id', getNeed)
   app.get('/api/needs/search', searchNeeds)
+  app.get('/api/needs/:id', getNeed)
   app.delete('/api/needs/:id', deleteNeed)
 }

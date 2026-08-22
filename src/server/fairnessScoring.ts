@@ -11,13 +11,12 @@
  * Scoring is transparent — the breakdown is always shown to stakeholders.
  */
 
-import {
+import type {
   InventoryItem,
   Need,
   Nonprofit,
-  RTFHDemographic,
-  radarPrioritySignals,
 } from '../shared/data/buyNothingData'
+import { RTFHDemographic, radarPrioritySignals } from '../shared/data/buyNothingData'
 
 export interface FairnessScoreBreakdown {
   fit: number // 0-100
@@ -84,8 +83,6 @@ const estimateServiceValue = (
 export const calculateFitScore = (
   inventory: InventoryItem,
   need: Need,
-  fromOrg: Nonprofit,
-  toOrg: Nonprofit,
 ): number => {
   let score = 0
 
@@ -170,8 +167,6 @@ export const calculateFitScore = (
 export const calculateValueScore = (
   inventory: InventoryItem,
   need: Need,
-  fromOrg: Nonprofit,
-  toOrg: Nonprofit,
 ): number => {
   const invValue = estimateServiceValue(
     inventory.serviceType,
@@ -188,16 +183,8 @@ export const calculateValueScore = (
   const ratio = Math.min(invValue, needValue) / Math.max(invValue, needValue)
   let score = Math.round(ratio * 100)
 
-  // Adjust for capacity strain
-  // If giver is underutilized (has excess), add points
-  if (fromOrg.utilizationRate < 0.6) {
-    score += 10
-  }
-
-  // If receiver is overutilized (has need), add points
-  if (toOrg.utilizationRate > 0.85) {
-    score += 10
-  }
+  // Adjustment for capacity strain could go here
+  // (fromOrg/toOrg utilization rates not currently used)
 
   return Math.min(score, 100)
 }
@@ -212,7 +199,6 @@ export const calculateValueScore = (
  */
 export const calculateRadarImpactScore = (
   inventory: InventoryItem,
-  need: Need,
 ): number => {
   let score = 50 // Baseline: neutral impact
 
@@ -271,9 +257,9 @@ export const calculateFairnessScore = (
   fromOrg: Nonprofit,
   toOrg: Nonprofit,
 ): FairnessScoreResult => {
-  const fit = calculateFitScore(inventory, need, fromOrg, toOrg)
-  const value = calculateValueScore(inventory, need, fromOrg, toOrg)
-  const radarImpact = calculateRadarImpactScore(inventory, need)
+  const fit = calculateFitScore(inventory, need)
+  const value = calculateValueScore(inventory, need)
+  const radarImpact = calculateRadarImpactScore(inventory)
   const reputation = calculateReputationScore(fromOrg, toOrg)
 
   // Weighted average: Fit (40%) + Value (35%) + RadarImpact (20%) + Reputation (5%)
